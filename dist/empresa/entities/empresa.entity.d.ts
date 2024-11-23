@@ -4,12 +4,14 @@ export declare class Empresa {
     empresaNombre: string;
     cotizationInicial: number;
     cantidadAcciones: number;
-    constructor(codempresa: string, empresaNombre: string);
+    constructor(partial?: Partial<Empresa>);
     getId(): number;
     getCodempresa(): string;
     setCodempresa(codempresa: string): void;
     getEmpresaNombre(): string;
     setEmpresaNombre(empresaNombre: string): void;
     getCotizacionInicial(): number;
+    setCotizacionInicial(cotizationInicial: number): void;
     getCantidadAcciones(): number;
+    setCantidadAcciones(cantidadAcciones: number): void;
 }

@@ -15,67 +15,28 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.EmpresaController = void 0;
 const common_1 = require("@nestjs/common");
 const empresa_service_1 = require("./empresa.service");
-const DateUtils_1 = require("../utils/DateUtils");
 let EmpresaController = class EmpresaController {
     constructor(empresaService) {
         this.empresaService = empresaService;
     }
-    async getDetalleEmpresa(codigoEmpresa) {
-        return await this.empresaService.getDetalleEmpresa(codigoEmpresa);
-    }
-    async getCotizacionesEmpresa(codigoEmpresa, fechaDesde, fechaHasta) {
-        if (DateUtils_1.default.isValidParamDate(fechaDesde) &&
-            DateUtils_1.default.isValidParamDate(fechaHasta)) {
-            return await this.empresaService.getCotizationesbyFechas(codigoEmpresa, fechaDesde, fechaHasta);
+    async obtenerInformacionEmpresa(codempresa) {
+        const empresa = await this.empresaService.findByCodempresa(codempresa);
+        if (!empresa) {
+            throw new common_1.NotFoundException('Empresa no encontrada');
         }
-        throw new common_1.HttpException({
-            status: common_1.HttpStatus.NOT_FOUND,
-            error: 'Error en las fechas ' + fechaDesde + ' to ' + fechaHasta,
-        }, common_1.HttpStatus.NOT_FOUND);
-    }
-    async getCotizacionEmpresa(codigoEmpresa, fecha, hora) {
-        if (DateUtils_1.default.isValidRegistroFecha({ fecha, hora })) {
-            return await this.empresaService.getCotizationFecha(codigoEmpresa, {
-                fecha,
-                hora,
-            });
-        }
-        else {
-            throw new common_1.HttpException({
-                status: common_1.HttpStatus.BAD_REQUEST,
-                error: 'Error ',
-            }, common_1.HttpStatus.BAD_REQUEST);
-        }
+        return empresa;
     }
 };
 exports.EmpresaController = EmpresaController;
 __decorate([
-    (0, common_1.Get)('/:codigoEmpresa/details'),
-    __param(0, (0, common_1.Param)('codigoEmpresa')),
+    (0, common_1.Get)(':codempresa'),
+    __param(0, (0, common_1.Param)('codempresa')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
-], EmpresaController.prototype, "getDetalleEmpresa", null);
-__decorate([
-    (0, common_1.Get)('/:codigoEmpresa/cotizaciones'),
-    __param(0, (0, common_1.Param)('codigoEmpresa')),
-    __param(1, (0, common_1.Query)('fechaDesde')),
-    __param(2, (0, common_1.Query)('fechaHasta')),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, String, String]),
-    __metadata("design:returntype", Promise)
-], EmpresaController.prototype, "getCotizacionesEmpresa", null);
-__decorate([
-    (0, common_1.Get)('/:codigoEmpresa/cotizacion'),
-    __param(0, (0, common_1.Param)('codigoEmpresa')),
-    __param(1, (0, common_1.Query)('fecha')),
-    __param(2, (0, common_1.Query)('hora')),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, String, String]),
-    __metadata("design:returntype", Promise)
-], EmpresaController.prototype, "getCotizacionEmpresa", null);
+], EmpresaController.prototype, "obtenerInformacionEmpresa", null);
 exports.EmpresaController = EmpresaController = __decorate([
-    (0, common_1.Controller)('empresas'),
+    (0, common_1.Controller)('empresa'),
     __metadata("design:paramtypes", [empresa_service_1.EmpresaService])
 ], EmpresaController);
 //# sourceMappingURL=empresa.controller.js.map

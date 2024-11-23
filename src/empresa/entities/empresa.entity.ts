@@ -1,43 +1,48 @@
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
-@Entity('empresas')
+@Entity('empresas') // Nombre de la tabla en la base de datos
 export class Empresa {
   @PrimaryGeneratedColumn({
-    type: 'int',
+    type: 'int', // El tipo de dato en la base de datos
   })
   public id: number;
 
   @Column({
     name: 'codEmpresa',
     length: 100,
+    nullable: false, // Asegúrate de que no sea nulo
   })
   public codempresa: string;
+  
 
   @Column({
-    name: 'empresaNombre',
-    length: 100,
+    name: 'empresaNombre', // Nombre de la columna
+    length: 100, // Longitud máxima de la cadena
   })
   public empresaNombre: string;
 
   @Column({
-    name: 'cotizationInicial',
-    type: 'decimal',
-    precision: 7,
-    scale: 2,
+    name: 'cotizationInicial', // Nombre de la columna
+    type: 'decimal', // Tipo de dato en la base de datos
+    precision: 7, // Número total de dígitos (entero + decimal)
+    scale: 2, // Número de dígitos decimales
   })
   public cotizationInicial: number;
 
   @Column({
-    name: 'cantidadAcciones',
-    type: 'bigint',
+    name: 'cantidadAcciones', // Nombre de la columna
+    type: 'bigint', // Tipo de dato para valores grandes
   })
   public cantidadAcciones: number;
 
-  constructor(codempresa: string, empresaNombre: string) {
-    this.codempresa = codempresa;
-    this.empresaNombre = empresaNombre;
+  // Constructor para inicializar una instancia con datos opcionales
+  constructor(partial?: Partial<Empresa>) {
+    if (partial) {
+      Object.assign(this, partial); // Asigna las propiedades proporcionadas
+    }
   }
 
+  // Métodos adicionales opcionales para la entidad
   public getId(): number {
     return this.id;
   }
@@ -46,7 +51,7 @@ export class Empresa {
     return this.codempresa;
   }
 
-  public setCodempresa(codempresa: string) {
+  public setCodempresa(codempresa: string): void {
     this.codempresa = codempresa;
   }
 
@@ -54,7 +59,7 @@ export class Empresa {
     return this.empresaNombre;
   }
 
-  public setEmpresaNombre(empresaNombre: string) {
+  public setEmpresaNombre(empresaNombre: string): void {
     this.empresaNombre = empresaNombre;
   }
 
@@ -62,7 +67,15 @@ export class Empresa {
     return this.cotizationInicial;
   }
 
+  public setCotizacionInicial(cotizationInicial: number): void {
+    this.cotizationInicial = cotizationInicial;
+  }
+
   public getCantidadAcciones(): number {
     return this.cantidadAcciones;
+  }
+
+  public setCantidadAcciones(cantidadAcciones: number): void {
+    this.cantidadAcciones = cantidadAcciones;
   }
 }

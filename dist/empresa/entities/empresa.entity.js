@@ -12,9 +12,10 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.Empresa = void 0;
 const typeorm_1 = require("typeorm");
 let Empresa = class Empresa {
-    constructor(codempresa, empresaNombre) {
-        this.codempresa = codempresa;
-        this.empresaNombre = empresaNombre;
+    constructor(partial) {
+        if (partial) {
+            Object.assign(this, partial);
+        }
     }
     getId() {
         return this.id;
@@ -34,8 +35,14 @@ let Empresa = class Empresa {
     getCotizacionInicial() {
         return this.cotizationInicial;
     }
+    setCotizacionInicial(cotizationInicial) {
+        this.cotizationInicial = cotizationInicial;
+    }
     getCantidadAcciones() {
         return this.cantidadAcciones;
+    }
+    setCantidadAcciones(cantidadAcciones) {
+        this.cantidadAcciones = cantidadAcciones;
     }
 };
 exports.Empresa = Empresa;
@@ -49,6 +56,7 @@ __decorate([
     (0, typeorm_1.Column)({
         name: 'codEmpresa',
         length: 100,
+        nullable: false,
     }),
     __metadata("design:type", String)
 ], Empresa.prototype, "codempresa", void 0);
@@ -77,6 +85,6 @@ __decorate([
 ], Empresa.prototype, "cantidadAcciones", void 0);
 exports.Empresa = Empresa = __decorate([
     (0, typeorm_1.Entity)('empresas'),
-    __metadata("design:paramtypes", [String, String])
+    __metadata("design:paramtypes", [Object])
 ], Empresa);
 //# sourceMappingURL=empresa.entity.js.map

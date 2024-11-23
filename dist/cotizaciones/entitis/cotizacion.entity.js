@@ -10,8 +10,8 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Cotizacion = void 0;
+const empresa_entity_1 = require("../../empresa/entities/empresa.entity");
 const typeorm_1 = require("typeorm");
-const empresa_entity_1 = require("./empresa.entity");
 let Cotizacion = class Cotizacion {
     constructor() { }
 };

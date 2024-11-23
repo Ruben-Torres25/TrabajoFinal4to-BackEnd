@@ -1,3 +1,4 @@
+import { Empresa } from 'src/empresa/entities/empresa.entity';
 import {
   Column,
   Entity,
@@ -5,7 +6,7 @@ import {
   ManyToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { Empresa } from './empresa.entity';
+
 
 @Entity('cotizaciones')
 export class Cotizacion {

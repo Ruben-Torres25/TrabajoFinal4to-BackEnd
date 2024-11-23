@@ -1,4 +1,4 @@
-import { Empresa } from './empresa.entity';
+import { Empresa } from 'src/empresa/entities/empresa.entity';
 export declare class Cotizacion {
     id: number;
     fecha: string;

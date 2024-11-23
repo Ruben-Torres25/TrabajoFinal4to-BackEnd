@@ -9,10 +9,10 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.EmpresaModule = void 0;
 const common_1 = require("@nestjs/common");
 const typeorm_1 = require("@nestjs/typeorm");
-const cotizacion_entity_1 = require("./entities/cotizacion.entity");
 const empresa_controller_1 = require("./empresa.controller");
 const empresa_service_1 = require("./empresa.service");
 const empresa_entity_1 = require("./entities/empresa.entity");
+const cotizacion_entity_1 = require("../cotizaciones/entitis/cotizacion.entity");
 let EmpresaModule = class EmpresaModule {
 };
 exports.EmpresaModule = EmpresaModule;

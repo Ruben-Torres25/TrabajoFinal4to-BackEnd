@@ -1,69 +1,18 @@
-import {
-  Controller,
-  Get,
-  HttpException,
-  HttpStatus,
-  Param,
-  Query,
-} from '@nestjs/common';
-import { EmpresaService } from './empresa.service';
-import DateUtils from 'src/utils/DateUtils';
+import { Controller, Get, Param, NotFoundException } from '@nestjs/common';
+import { EmpresaService } from './empresa.service'; // Asegúrate de tener un servicio para manejar la lógica
 
-@Controller('empresas')
+@Controller('empresa') 
 export class EmpresaController {
   constructor(private readonly empresaService: EmpresaService) {}
 
-  @Get('/:codigoEmpresa/details')
-  async getDetalleEmpresa(
-    @Param('codigoEmpresa') codigoEmpresa: string,
-  ): Promise<any> {
-    return await this.empresaService.getDetalleEmpresa(codigoEmpresa);
-  }
+  @Get(':codempresa') // Define la ruta para obtener una empresa por su código
+  async obtenerInformacionEmpresa(@Param('codempresa') codempresa: string) {
+    const empresa = await this.empresaService.findByCodempresa(codempresa);
 
-  @Get('/:codigoEmpresa/cotizaciones')
-  async getCotizacionesEmpresa(
-    @Param('codigoEmpresa') codigoEmpresa: string,
-    @Query('fechaDesde') fechaDesde: string,
-    @Query('fechaHasta') fechaHasta: string,
-  ): Promise<any> {
-    if (
-      DateUtils.isValidParamDate(fechaDesde) &&
-      DateUtils.isValidParamDate(fechaHasta)
-    ) {
-      return await this.empresaService.getCotizationesbyFechas(
-        codigoEmpresa,
-        fechaDesde,
-        fechaHasta,
-      );
+    if (!empresa) {
+      throw new NotFoundException('Empresa no encontrada'); // Lanza una excepción si no se encuentra la empresa
     }
-    throw new HttpException(
-      {
-        status: HttpStatus.NOT_FOUND,
-        error: 'Error en las fechas ' + fechaDesde + ' to ' + fechaHasta,
-      },
-      HttpStatus.NOT_FOUND,
-    );
-  }
 
-  @Get('/:codigoEmpresa/cotizacion')
-  async getCotizacionEmpresa(
-    @Param('codigoEmpresa') codigoEmpresa: string,
-    @Query('fecha') fecha: string,
-    @Query('hora') hora: string,
-  ): Promise<any> {
-    if (DateUtils.isValidRegistroFecha({ fecha, hora })) {
-      return await this.empresaService.getCotizationFecha(codigoEmpresa, {
-        fecha,
-        hora,
-      });
-    } else {
-      throw new HttpException(
-        {
-          status: HttpStatus.BAD_REQUEST,
-          error: 'Error ',
-        },
-        HttpStatus.BAD_REQUEST,
-      );
-    }
+    return empresa; // Retorna la información de la empresa
   }
 }

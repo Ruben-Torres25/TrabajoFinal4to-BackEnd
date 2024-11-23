@@ -3,6 +3,8 @@ import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { EmpresaModule } from './empresa/empresa.module';
+import { CotizacionesModule } from './cotizaciones/cotizaciones.module';
 
 @Module({
   imports: [
@@ -23,8 +25,11 @@ import { AppService } from './app.service';
       entities: ['dist/**/*.entity.js'],
       logging: true,
     }),
+    EmpresaModule,
+
   ],
   controllers: [AppController],
   providers: [AppService],
+  
 })
 export class AppModule {}
