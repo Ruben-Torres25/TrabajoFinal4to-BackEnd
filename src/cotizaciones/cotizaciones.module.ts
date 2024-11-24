@@ -1,9 +1,14 @@
 import { Module } from '@nestjs/common';
-import { CotizacionesController } from './cotizaciones.controller';
-import { CotizacionesService } from './cotizaciones.service';
+import { CotizacionController } from './cotizaciones.controller';
+import { CotizacionService } from './cotizaciones.service';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { Empresa } from 'src/empresa/entities/empresa.entity';
+import { Cotizacion } from './entitis/cotizacion.entity';
+
 
 @Module({
-  controllers: [CotizacionesController],
-  providers: [CotizacionesService],
+  imports: [TypeOrmModule.forFeature([Empresa, Cotizacion])],
+  controllers: [CotizacionController],
+  providers: [CotizacionService],
 })
-export class CotizacionesModule {}
+export class CotizacionModule {}

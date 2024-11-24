@@ -10,36 +10,33 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Cotizacion = void 0;
-const empresa_entity_1 = require("../../empresa/entities/empresa.entity");
 const typeorm_1 = require("typeorm");
 let Cotizacion = class Cotizacion {
-    constructor() { }
 };
 exports.Cotizacion = Cotizacion;
 __decorate([
     (0, typeorm_1.PrimaryGeneratedColumn)({
-        type: 'bigint',
+        type: 'int',
     }),
     __metadata("design:type", Number)
 ], Cotizacion.prototype, "id", void 0);
 __decorate([
     (0, typeorm_1.Column)({
         name: 'fecha',
-        type: 'varchar',
-        precision: 10,
+        type: 'date',
     }),
     __metadata("design:type", String)
 ], Cotizacion.prototype, "fecha", void 0);
 __decorate([
     (0, typeorm_1.Column)({
         name: 'hora',
-        type: 'varchar',
-        precision: 5,
+        length: 5,
     }),
     __metadata("design:type", String)
 ], Cotizacion.prototype, "hora", void 0);
 __decorate([
     (0, typeorm_1.Column)({
+        name: 'dateUTC',
         type: 'date',
     }),
     __metadata("design:type", String)
@@ -54,15 +51,13 @@ __decorate([
     __metadata("design:type", Number)
 ], Cotizacion.prototype, "cotization", void 0);
 __decorate([
-    (0, typeorm_1.ManyToOne)(() => empresa_entity_1.Empresa),
-    (0, typeorm_1.JoinColumn)({
-        name: 'idEmpresa',
-        referencedColumnName: 'id',
+    (0, typeorm_1.Column)({
+        name: 'codempresa',
+        length: 100,
     }),
-    __metadata("design:type", empresa_entity_1.Empresa)
-], Cotizacion.prototype, "empresa", void 0);
+    __metadata("design:type", String)
+], Cotizacion.prototype, "codempresa", void 0);
 exports.Cotizacion = Cotizacion = __decorate([
-    (0, typeorm_1.Entity)('cotizaciones'),
-    __metadata("design:paramtypes", [])
+    (0, typeorm_1.Entity)('cotizaciones')
 ], Cotizacion);
 //# sourceMappingURL=cotizacion.entity.js.map

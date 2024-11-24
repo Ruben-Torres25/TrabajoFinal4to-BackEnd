@@ -27,15 +27,12 @@ let EmpresaService = class EmpresaService {
         try {
             const response = await axios_1.default.get(`${this.apiUrl}empresas/${codempresa}/details`);
             const empresas = response.data;
-            console.log(empresas, 'hola 1');
-            console.log(empresas.codempresa, 'codigo de empresas');
             const guardado = this.indiceRepository.create({
                 codempresa: empresas.codempresa,
                 empresaNombre: empresas.empresaNombre,
                 cotizationInicial: parseFloat(empresas.cotizationInicial),
                 cantidadAcciones: parseInt(empresas.cantidadAcciones),
             });
-            console.log(guardado);
             await this.indiceRepository.save(guardado);
             return empresas;
         }

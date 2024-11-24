@@ -1,9 +1,8 @@
-export declare class CotizacionesController {
-    private readonly cotizacionesService;
-    constructor(cotizacionesService: any);
-    create(createCotizacioneDto: any): any;
-    findAll(): any;
-    findOne(id: string): any;
-    update(id: string, updateCotizacioneDto: any): any;
-    remove(id: string): any;
+import { CotizacionService } from './cotizaciones.service';
+import { CotizacionDto } from './dto/cotizacion.dto';
+export declare class CotizacionController {
+    private readonly cotizacionService;
+    constructor(cotizacionService: CotizacionService);
+    obtenerCotizacion(codigoEmpresa: string, fecha: string, hora: string): Promise<CotizacionDto>;
+    obtenerCotizacionesRango(codempresa: string, fechaDesde: string, fechaHasta: string): Promise<any>;
 }

@@ -19,19 +19,15 @@ export class EmpresaService {
         `${this.apiUrl}empresas/${codempresa}/details`,
       );
       const empresas = response.data;
-
-      console.log(empresas, 'hola 1');
-      console.log(empresas.codempresa, 'codigo de empresas');
-      // Crear una nueva instancia de la empresa
+      
       const guardado = this.indiceRepository.create({
-        codempresa: empresas.codempresa, // Asegúrate de que "codeEmpresa" venga correctamente del servicio externo
+        codempresa: empresas.codempresa, 
         empresaNombre: empresas.empresaNombre,
         cotizationInicial: parseFloat(empresas.cotizationInicial),
         cantidadAcciones: parseInt(empresas.cantidadAcciones),
       });
       
-      console.log(guardado)
-      // Guardar en la base de datos
+      
       await this.indiceRepository.save(guardado);
       
       return empresas;

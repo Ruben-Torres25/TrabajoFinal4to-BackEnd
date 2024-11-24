@@ -1,35 +1,27 @@
-import { Empresa } from 'src/empresa/entities/empresa.entity';
-import {
-  Column,
-  Entity,
-  JoinColumn,
-  ManyToOne,
-  PrimaryGeneratedColumn,
-} from 'typeorm';
+// src/empresa/entities/cotizacion.entity.ts
+import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
-
-@Entity('cotizaciones')
+@Entity('cotizaciones') 
 export class Cotizacion {
   @PrimaryGeneratedColumn({
-    type: 'bigint',
+    type: 'int',
   })
   public id: number;
 
   @Column({
     name: 'fecha',
-    type: 'varchar',
-    precision: 10,
+    type: 'date', 
   })
   public fecha: string;
 
   @Column({
     name: 'hora',
-    type: 'varchar',
-    precision: 5,
+    length: 5,
   })
   public hora: string;
 
   @Column({
+    name: 'dateUTC',
     type: 'date',
   })
   public dateUTC: string;
@@ -42,12 +34,9 @@ export class Cotizacion {
   })
   public cotization: number;
 
-  @ManyToOne(() => Empresa)
-  @JoinColumn({
-    name: 'idEmpresa',
-    referencedColumnName: 'id',
+  @Column({
+    name: 'codempresa',
+    length: 100,
   })
-  empresa: Empresa;
-
-  constructor() {}
+  public codempresa: string;
 }
