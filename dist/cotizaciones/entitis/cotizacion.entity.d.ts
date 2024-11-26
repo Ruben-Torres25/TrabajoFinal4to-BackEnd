@@ -1,8 +1,8 @@
+import { Empresa } from 'src/empresa/entities/empresa.entity';
 export declare class Cotizacion {
     id: number;
-    fecha: string;
+    fecha: Date;
     hora: string;
-    dateUTC: string;
     cotization: number;
-    codempresa: string;
+    empresa: Empresa;
 }

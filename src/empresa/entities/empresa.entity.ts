@@ -33,7 +33,8 @@ export class Empresa {
     name: 'cantidadAcciones', 
     type: 'bigint', 
   })
-  public cantidadAcciones: number;
+  public cantidadAcciones: bigint;
+  cotizaciones: any;
 
   
   constructor(partial?: Partial<Empresa>) {
@@ -71,11 +72,11 @@ export class Empresa {
     this.cotizationInicial = cotizationInicial;
   }
 
-  public getCantidadAcciones(): number {
+  public getCantidadAcciones(): bigint {
     return this.cantidadAcciones;
   }
 
-  public setCantidadAcciones(cantidadAcciones: number): void {
+  public setCantidadAcciones(cantidadAcciones: bigint): void {
     this.cantidadAcciones = cantidadAcciones;
   }
 }

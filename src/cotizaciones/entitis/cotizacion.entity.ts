@@ -1,42 +1,33 @@
-// src/empresa/entities/cotizacion.entity.ts
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { IsNumber } from 'class-validator';
+import { Empresa } from 'src/empresa/entities/empresa.entity';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  ManyToOne,
+  JoinColumn,
+  Unique,
+  Index,
+} from 'typeorm';
 
-@Entity('cotizaciones') 
+@Entity('cotizaciones')
+@Index(['empresa', 'fecha', 'hora'], { unique: true })
 export class Cotizacion {
-  @PrimaryGeneratedColumn({
-    type: 'int',
-  })
-  public id: number;
+  @PrimaryGeneratedColumn()
+  id: number;
 
-  @Column({
-    name: 'fecha',
-    type: 'date', 
-  })
-  public fecha: string;
+  @Column({ type: 'date' })
+  fecha: Date;
 
-  @Column({
-    name: 'hora',
-    length: 5,
-  })
-  public hora: string;
+  @Column({ type: 'time' })
+  hora: string;
 
-  @Column({
-    name: 'dateUTC',
-    type: 'date',
-  })
-  public dateUTC: string;
+  @IsNumber()
+  @Column({ type: 'decimal', precision: 10, scale: 2 })
+  cotization: number;
 
-  @Column({
-    name: 'cotization',
-    type: 'decimal',
-    precision: 7,
-    scale: 2,
-  })
-  public cotization: number;
+  @ManyToOne(() => Empresa, (empresa) => empresa.cotizaciones)
+  @JoinColumn({ name: 'empresa_id' })
+  empresa: Empresa;
 
-  @Column({
-    name: 'codempresa',
-    length: 100,
-  })
-  public codempresa: string;
 }

@@ -15,18 +15,30 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.CotizacionController = void 0;
 const common_1 = require("@nestjs/common");
 const cotizaciones_service_1 = require("./cotizaciones.service");
+const cron_service_1 = require("../services/cron.service");
 let CotizacionController = class CotizacionController {
-    constructor(cotizacionService) {
+    constructor(cotizacionService, cotizacionCronService) {
         this.cotizacionService = cotizacionService;
+        this.cotizacionCronService = cotizacionCronService;
     }
-    async obtenerCotizacion(codigoEmpresa, fecha, hora) {
-        return this.cotizacionService.obtenerCotizacion(codigoEmpresa, fecha, hora);
+    async ejecutarCotizaciones() {
+        await this.cotizacionCronService.ejecutarAhora();
+        return { message: 'Ejecutando cron para obtener cotizaciones ahora.' };
+    }
+    async obtenerCotizacionEmpresa(codigoEmpresa, fecha, hora) {
+        return this.cotizacionService.obtenerCotizacionEmpresa(codigoEmpresa, fecha, hora);
     }
     async obtenerCotizacionesRango(codempresa, fechaDesde, fechaHasta) {
-        return this.cotizacionService.obtenerCotizaciones(codempresa, fechaDesde, fechaHasta);
+        return this.cotizacionService.obtenerCotizacionesRango(codempresa, fechaDesde, fechaHasta);
     }
 };
 exports.CotizacionController = CotizacionController;
+__decorate([
+    (0, common_1.Get)('ejecutar-cotizaciones'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], CotizacionController.prototype, "ejecutarCotizaciones", null);
 __decorate([
     (0, common_1.Get)(':codigoEmpresa/cotizacion'),
     __param(0, (0, common_1.Param)('codigoEmpresa')),
@@ -35,7 +47,7 @@ __decorate([
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String, String, String]),
     __metadata("design:returntype", Promise)
-], CotizacionController.prototype, "obtenerCotizacion", null);
+], CotizacionController.prototype, "obtenerCotizacionEmpresa", null);
 __decorate([
     (0, common_1.Get)(':codempresa/rango'),
     __param(0, (0, common_1.Param)('codempresa')),
@@ -47,6 +59,7 @@ __decorate([
 ], CotizacionController.prototype, "obtenerCotizacionesRango", null);
 exports.CotizacionController = CotizacionController = __decorate([
     (0, common_1.Controller)('empresas'),
-    __metadata("design:paramtypes", [cotizaciones_service_1.CotizacionService])
+    __metadata("design:paramtypes", [cotizaciones_service_1.CotizacionService,
+        cron_service_1.CotizacionCronService])
 ], CotizacionController);
 //# sourceMappingURL=cotizaciones.controller.js.map
