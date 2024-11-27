@@ -1,2 +1,2 @@
-export declare class CotizacionesModule {
+export declare class CotizacionModule {
 }

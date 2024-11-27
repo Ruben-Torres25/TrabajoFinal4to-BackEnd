@@ -1,32 +1,40 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Param, Query } from '@nestjs/common';
+import { CotizacionService } from './cotizaciones.service';
+import { CotizacionDto } from './dto/cotizacion.dto';
+import { CotizacionCronService } from 'src/services/cron.service';
 
 
-@Controller('cotizaciones')
-export class CotizacionesController {
-  constructor(private readonly cotizacionesService) {}
+@Controller('empresas')
+export class CotizacionController {
+  constructor(private readonly cotizacionService: CotizacionService,
+    private readonly cotizacionCronService: CotizacionCronService
+  ) {}
 
-  @Post()
-  create(@Body() createCotizacioneDto) {
-    return this.cotizacionesService.create(createCotizacioneDto);
+
+  @Get('ejecutar-cotizaciones')
+  async ejecutarCotizaciones() {
+      await this.cotizacionCronService.ejecutarAhora();
+      return { message: 'Ejecutando cron para obtener cotizaciones ahora.' };
   }
 
-  @Get()
-  findAll() {
-    return this.cotizacionesService.findAll();
+
+  @Get(':codigoEmpresa/cotizacion') 
+  async obtenerCotizacionEmpresa(
+    @Param('codigoEmpresa') codigoEmpresa: string,
+    @Query('fecha') fecha: string,
+    @Query('hora') hora: string,
+  ): Promise<CotizacionDto> {
+    return this.cotizacionService.obtenerCotizacionEmpresa(codigoEmpresa, fecha, hora);
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.cotizacionesService.findOne(+id);
+
+  @Get(':codempresa/rango')
+  async obtenerCotizacionesRango(
+    @Param('codempresa') codempresa: string,
+    @Query('fechaDesde') fechaDesde: string,
+    @Query('fechaHasta') fechaHasta: string,
+  ) {
+    return this.cotizacionService.obtenerCotizacionesRango(codempresa, fechaDesde, fechaHasta);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateCotizacioneDto) {
-    return this.cotizacionesService.update(+id, updateCotizacioneDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.cotizacionesService.remove(+id);
-  }
 }

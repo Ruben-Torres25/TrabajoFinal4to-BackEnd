@@ -2,15 +2,18 @@ import { RegistroCotizacion } from 'src/model/registro.cotizacion';
 import { RegistroFecha } from 'src/model/registro.fecha';
 
 class DateUtils {
-  /**
+ /**
    * Toma la Fecha de Hoy y genera un objeto bajo los formatos definidos
-   * @returns  Objeto con la fecha y la hora en el formato standar
+   * @returns  Objeto con la fecha y la hora en el formato estándar
    * fecha: yyyy-mm-dd
    * hora: hh:mm
    */
-  static getFechaHoraActual(): string {
-    return '';
-  }
+ static getFechaHoraActual(): RegistroFecha {
+  const now = new Date();
+  const fecha = now.toISOString().substring(0, 10); // yyyy-mm-dd
+  const hora = now.toISOString().substring(11, 16); // HH:mm
+  return { fecha, hora };
+}
 
   static isValidParamDate(fecha: string): boolean {
     return /^\d{4}-[01]\d-[0-3]\dT([01]\d|2[0-3]):[0-5]\d$/.test(fecha);

@@ -2,7 +2,10 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 class DateUtils {
     static getFechaHoraActual() {
-        return '';
+        const now = new Date();
+        const fecha = now.toISOString().substring(0, 10);
+        const hora = now.toISOString().substring(11, 16);
+        return { fecha, hora };
     }
     static isValidParamDate(fecha) {
         return /^\d{4}-[01]\d-[0-3]\dT([01]\d|2[0-3]):[0-5]\d$/.test(fecha);

@@ -81,7 +81,7 @@ __decorate([
         name: 'cantidadAcciones',
         type: 'bigint',
     }),
-    __metadata("design:type", Number)
+    __metadata("design:type", BigInt)
 ], Empresa.prototype, "cantidadAcciones", void 0);
 exports.Empresa = Empresa = __decorate([
     (0, typeorm_1.Entity)('empresas'),

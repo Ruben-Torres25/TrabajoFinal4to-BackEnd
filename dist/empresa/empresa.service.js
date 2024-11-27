@@ -23,19 +23,31 @@ let EmpresaService = class EmpresaService {
         this.indiceRepository = indiceRepository;
         this.apiUrl = 'http://ec2-54-145-211-254.compute-1.amazonaws.com:3000/';
     }
+    async findAll() {
+        try {
+            return await this.indiceRepository.find();
+        }
+        catch (error) {
+            console.error(error);
+            throw new common_1.HttpException('Error al obtener las empresas', common_1.HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
     async findByCodempresa(codempresa) {
         try {
+            const empresaExistente = await this.indiceRepository.findOne({
+                where: { codempresa: codempresa }
+            });
+            if (empresaExistente) {
+                throw new common_1.HttpException('La empresa ya existe en tu base de datos', common_1.HttpStatus.CONFLICT);
+            }
             const response = await axios_1.default.get(`${this.apiUrl}empresas/${codempresa}/details`);
             const empresas = response.data;
-            console.log(empresas, 'hola 1');
-            console.log(empresas.codempresa, 'codigo de empresas');
             const guardado = this.indiceRepository.create({
                 codempresa: empresas.codempresa,
                 empresaNombre: empresas.empresaNombre,
                 cotizationInicial: parseFloat(empresas.cotizationInicial),
-                cantidadAcciones: parseInt(empresas.cantidadAcciones),
+                cantidadAcciones: BigInt(empresas.cantidadAcciones),
             });
-            console.log(guardado);
             await this.indiceRepository.save(guardado);
             return empresas;
         }

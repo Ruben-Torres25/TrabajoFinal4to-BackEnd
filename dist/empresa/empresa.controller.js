@@ -19,6 +19,9 @@ let EmpresaController = class EmpresaController {
     constructor(empresaService) {
         this.empresaService = empresaService;
     }
+    async obtenerTodasLasEmpresas() {
+        return this.empresaService.findAll();
+    }
     async obtenerInformacionEmpresa(codempresa) {
         const empresa = await this.empresaService.findByCodempresa(codempresa);
         if (!empresa) {
@@ -28,6 +31,12 @@ let EmpresaController = class EmpresaController {
     }
 };
 exports.EmpresaController = EmpresaController;
+__decorate([
+    (0, common_1.Get)(),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], EmpresaController.prototype, "obtenerTodasLasEmpresas", null);
 __decorate([
     (0, common_1.Get)(':codempresa'),
     __param(0, (0, common_1.Param)('codempresa')),

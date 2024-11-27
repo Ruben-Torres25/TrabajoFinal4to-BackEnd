@@ -13,25 +13,44 @@ export class EmpresaService {
     private readonly indiceRepository: Repository<Empresa>,
   ) {}
 
+
+  async findAll(): Promise<Empresa[]> {
+    try {
+      return await this.indiceRepository.find();
+    } catch (error) {
+      console.error(error);
+      throw new HttpException(
+        'Error al obtener las empresas',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+
+
   async findByCodempresa(codempresa: string) {
     try {
+      // Verificar si la empresa ya existe en la base de datos
+      const empresaExistente = await this.indiceRepository.findOne({
+        where: { codempresa: codempresa }
+      });
+  
+      if (empresaExistente) {
+        throw new HttpException('La empresa ya existe en tu base de datos', HttpStatus.CONFLICT);
+      }
+  
       const response = await clienteAxios.get(
         `${this.apiUrl}empresas/${codempresa}/details`,
       );
       const empresas = response.data;
-
-      console.log(empresas, 'hola 1');
-      console.log(empresas.codempresa, 'codigo de empresas');
-      // Crear una nueva instancia de la empresa
+      
       const guardado = this.indiceRepository.create({
-        codempresa: empresas.codempresa, // Asegúrate de que "codeEmpresa" venga correctamente del servicio externo
+        codempresa: empresas.codempresa, 
         empresaNombre: empresas.empresaNombre,
         cotizationInicial: parseFloat(empresas.cotizationInicial),
-        cantidadAcciones: parseInt(empresas.cantidadAcciones),
+        cantidadAcciones: BigInt(empresas.cantidadAcciones),
       });
       
-      console.log(guardado)
-      // Guardar en la base de datos
       await this.indiceRepository.save(guardado);
       
       return empresas;

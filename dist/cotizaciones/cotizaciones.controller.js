@@ -12,66 +12,54 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.CotizacionesController = void 0;
+exports.CotizacionController = void 0;
 const common_1 = require("@nestjs/common");
-let CotizacionesController = class CotizacionesController {
-    constructor(cotizacionesService) {
-        this.cotizacionesService = cotizacionesService;
+const cotizaciones_service_1 = require("./cotizaciones.service");
+const cron_service_1 = require("../services/cron.service");
+let CotizacionController = class CotizacionController {
+    constructor(cotizacionService, cotizacionCronService) {
+        this.cotizacionService = cotizacionService;
+        this.cotizacionCronService = cotizacionCronService;
     }
-    create(createCotizacioneDto) {
-        return this.cotizacionesService.create(createCotizacioneDto);
+    async ejecutarCotizaciones() {
+        await this.cotizacionCronService.ejecutarAhora();
+        return { message: 'Ejecutando cron para obtener cotizaciones ahora.' };
     }
-    findAll() {
-        return this.cotizacionesService.findAll();
+    async obtenerCotizacionEmpresa(codigoEmpresa, fecha, hora) {
+        return this.cotizacionService.obtenerCotizacionEmpresa(codigoEmpresa, fecha, hora);
     }
-    findOne(id) {
-        return this.cotizacionesService.findOne(+id);
-    }
-    update(id, updateCotizacioneDto) {
-        return this.cotizacionesService.update(+id, updateCotizacioneDto);
-    }
-    remove(id) {
-        return this.cotizacionesService.remove(+id);
+    async obtenerCotizacionesRango(codempresa, fechaDesde, fechaHasta) {
+        return this.cotizacionService.obtenerCotizacionesRango(codempresa, fechaDesde, fechaHasta);
     }
 };
-exports.CotizacionesController = CotizacionesController;
+exports.CotizacionController = CotizacionController;
 __decorate([
-    (0, common_1.Post)(),
-    __param(0, (0, common_1.Body)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object]),
-    __metadata("design:returntype", void 0)
-], CotizacionesController.prototype, "create", null);
-__decorate([
-    (0, common_1.Get)(),
+    (0, common_1.Get)('ejecutar-cotizaciones'),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
-    __metadata("design:returntype", void 0)
-], CotizacionesController.prototype, "findAll", null);
+    __metadata("design:returntype", Promise)
+], CotizacionController.prototype, "ejecutarCotizaciones", null);
 __decorate([
-    (0, common_1.Get)(':id'),
-    __param(0, (0, common_1.Param)('id')),
+    (0, common_1.Get)(':codigoEmpresa/cotizacion'),
+    __param(0, (0, common_1.Param)('codigoEmpresa')),
+    __param(1, (0, common_1.Query)('fecha')),
+    __param(2, (0, common_1.Query)('hora')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", void 0)
-], CotizacionesController.prototype, "findOne", null);
+    __metadata("design:paramtypes", [String, String, String]),
+    __metadata("design:returntype", Promise)
+], CotizacionController.prototype, "obtenerCotizacionEmpresa", null);
 __decorate([
-    (0, common_1.Patch)(':id'),
-    __param(0, (0, common_1.Param)('id')),
-    __param(1, (0, common_1.Body)()),
+    (0, common_1.Get)(':codempresa/rango'),
+    __param(0, (0, common_1.Param)('codempresa')),
+    __param(1, (0, common_1.Query)('fechaDesde')),
+    __param(2, (0, common_1.Query)('fechaHasta')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, Object]),
-    __metadata("design:returntype", void 0)
-], CotizacionesController.prototype, "update", null);
-__decorate([
-    (0, common_1.Delete)(':id'),
-    __param(0, (0, common_1.Param)('id')),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", void 0)
-], CotizacionesController.prototype, "remove", null);
-exports.CotizacionesController = CotizacionesController = __decorate([
-    (0, common_1.Controller)('cotizaciones'),
-    __metadata("design:paramtypes", [Object])
-], CotizacionesController);
+    __metadata("design:paramtypes", [String, String, String]),
+    __metadata("design:returntype", Promise)
+], CotizacionController.prototype, "obtenerCotizacionesRango", null);
+exports.CotizacionController = CotizacionController = __decorate([
+    (0, common_1.Controller)('empresas'),
+    __metadata("design:paramtypes", [cotizaciones_service_1.CotizacionService,
+        cron_service_1.CotizacionCronService])
+], CotizacionController);
 //# sourceMappingURL=cotizaciones.controller.js.map
