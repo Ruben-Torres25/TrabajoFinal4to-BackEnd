@@ -73,15 +73,13 @@ export class CotizacionService {
         throw new HttpException('Empresa no encontrada', HttpStatus.NOT_FOUND);
       }
   
-      // Crea el objeto de cotización
       const guardado = this.cotizacionRepository.create({
         fecha: new Date(fechaLocal),
-        hora: horaLocal,
+        hora: horaLocal, 
         cotization: parseFloat(parseFloat(cotizacionIndividual.cotization).toFixed(2)),
         empresa: empresa,
       });
   
-      // Guarda la cotización en la base de datos
       await this.cotizacionRepository.save(guardado);
   
       return response.data;
@@ -113,14 +111,13 @@ export class CotizacionService {
 
   async obtenerCotizacionesDesdeInicioDelAno(): Promise<void> {
     try {
-      const fechaInicio = moment().startOf('year').toDate(); // 1 de enero del año actual
-      const fechaActual = new Date(); // Fecha actual
+      const fechaInicio = moment().startOf('year').toDate(); 
+      const fechaActual = new Date(); 
   
-      // Obtener todas las empresas
       const empresas = await this.empresaRepository.find();
       
       for (const empresa of empresas) {
-        // Buscar la última fecha guardada para la empresa
+        
         const ultimaCotizacion = await this.cotizacionRepository.findOne({
           where: { empresa: { id: empresa.id } },
           order: { fecha: 'DESC' },
@@ -128,21 +125,20 @@ export class CotizacionService {
         
         const fechaUltimaGuardada = ultimaCotizacion ? ultimaCotizacion.fecha : fechaInicio;
         
-        // Obtener cotizaciones desde la API desde la última fecha guardada hasta la fecha actual
+        
         for (let fecha = moment(fechaUltimaGuardada).add(1, 'days'); fecha.isBefore(fechaActual); fecha.add(1, 'days')) {
           const fechaStr = fecha.format('YYYY-MM-DD');
   
-          // Obtener cotización para cada hora que necesites (ej. cada hora de 9 a 15)
+          
           for (let hora = 9; hora <= 15; hora++) {
             const horaStr = hora.toString().padStart(2, '0') + ':00';
   
-            // Llamar a la API para obtener la cotización
+           
             try {
               const cotizacion = await clienteAxios.get(`${this.apiUrl}empresas/${empresa.codempresa}/cotizacion`, {
                 params: { fecha: fechaStr, hora: horaStr },
               });
               
-              // Verificar si la cotización ya existe en la base de datos
               const cotizacionExistente = await this.cotizacionRepository.findOne({
                 where: {
                   empresa: { id: empresa.id },
@@ -151,7 +147,6 @@ export class CotizacionService {
                 },
               });
               
-              // Solo insertar si no existe
               if (!cotizacionExistente) {
                 const guardado = this.cotizacionRepository.create({
                   fecha: moment(cotizacion.data.fecha).tz(this.brazilTimezone).toDate(),
@@ -159,8 +154,7 @@ export class CotizacionService {
                   cotization: parseFloat(cotizacion.data.cotization),
                   empresa: empresa,
                 });
-   
-                // Guarda la cotización en la base de datos
+                
                 await this.cotizacionRepository.save(guardado);
                 console.log(`Cotización guardada para la empresa ${empresa.codempresa} en la fecha ${fechaStr} a las ${horaStr}`);
               } else {
@@ -191,124 +185,3 @@ export class CotizacionService {
   y si pasa esa verificacion me las guarde en mi db
   esto debe aplicarse para todas las empresas y eso lo guardo en mi db
   */
-
-
-/*
- 
-2 empresas mas a eleccion
-preguntar si para esa empresa existe una cotizaxion entre esta fecha y hora*/ 
-
-
-/*
- async obtenerCotizacionesDesdeInicioDelAno(): Promise<void> {
-    try {
-      const fechaInicio = moment().startOf('year').toDate(); // 1 de enero del año actual
-      const fechaActual = new Date(); // Fecha actual
-  
-      // Obtener todas las empresas
-      const empresas = await this.empresaRepository.find();
-  
-      for (const empresa of empresas) {
-        // Obtener las cotizaciones desde la API para cada día entre la fecha de inicio y la fecha actual
-        for (let fecha = moment(fechaInicio); fecha.isBefore(fechaActual); fecha.add(1, 'days')) {
-          const fechaStr = fecha.format('YYYY-MM-DD');
-          const horaStr = '00:00'; // Puedes ajustar la hora según sea necesario
-  
-          // Llamar a la función para obtener la cotización de la API
-          const cotizacion = await this.obtenerCotizacionEmpresa(empresa.codempresa, fechaStr, horaStr);
-  
-          // Verificar si la cotización ya existe en la base de datos
-          const cotizacionExistente = await this.cotizacionRepository.findOne({
-            where: {
-              empresa: { id: empresa.id },
-              fecha: new Date(cotizacion.fecha),
-              hora: cotizacion.hora,
-            },
-          });
-  
-          // Si no existe, guardar la nueva cotización
-          if (!cotizacionExistente) {
-            const guardado = this.cotizacionRepository.create({
-              fecha: new Date(cotizacion.fecha),
-              hora: cotizacion.hora,
-              cotization: parseFloat(cotizacion.cotization),
-              empresa: empresa,
-            });
-  
-            await this.cotizacionRepository.save(guardado);
-            console.log(`Cotización guardada para la empresa ${empresa.codempresa} en la fecha ${fechaStr}`);
-          } else {
-            console.log(`Cotización ya existe para la empresa ${empresa.codempresa} en la fecha ${fechaStr}`);
-          }
-        }
-      }
-    } catch (error) {
-      console.error('Error al obtener cotizaciones desde el inicio del año:', error);
-      throw new HttpException('Error al obtener las cotizaciones', HttpStatus.INTERNAL_SERVER_ERROR);
-    }
-  }
- 
-
-*/ 
-
-
-
-
-/*
-
-
-async obtenerCotizacionesDesdeInicioDelAno(): Promise<void> {
-    try {
-        // Establece la fecha de inicio en la zona horaria de Brasil
-        const fechaInicio = moment.tz('2024-01-01', 'America/Sao_Paulo').startOf('day').toDate();
-        const fechaActual = moment.tz(new Date(), 'America/Sao_Paulo').toDate(); 
-
-        const empresas = await this.empresaRepository.find();
-
-        for (const empresa of empresas) {
-            for (let fecha = moment(fechaInicio); fecha.isBefore(fechaActual); fecha.add(1, 'days')) {
-                const fechaStr = fecha.format('YYYY-MM-DD');
-
-                for (let hora = 9; hora <= 15; hora++) {
-                    const horaStr = hora.toString().padStart(2, '0') + ':00';
-
-                    // Verificar si la cotización ya existe
-                    const cotizacionExistente = await this.cotizacionRepository.findOne({
-                        where: {
-                            empresa: { id: empresa.id },
-                            fecha: moment(fechaStr).tz('America/Sao_Paulo').startOf('day').toDate(), // Asegúrate de que la fecha esté en la zona horaria de Brasil
-                            hora: horaStr,
-                        },
-                    });
-
-                    // Solo insertar si no existe
-                    if (!cotizacionExistente) {
-                        const cotizacion = await this.obtenerCotizacionEmpresa(empresa.codempresa, fechaStr, horaStr);
-                        if (cotizacion) {
-                            console.log(`Intentando guardar cotización: ${fechaStr}, ${horaStr}, ${cotizacion.cotization}, ${empresa.id}`);
-                            const guardado = this.cotizacionRepository.create({
-                                fecha: moment(cotizacion.fecha).tz('America/Sao_Paulo').toDate(), // Convertir a la zona horaria de Brasil
-                                hora: cotizacion.hora, // Asegúrate de que cotizacion.hora esté en el formato HH:mm
-                                cotization: parseFloat(cotizacion.cotization),
-                                empresa: empresa,
-                            });
-
-                            // Guarda la cotización en la base de datos
-                            await this.cotizacionRepository.save(guardado);
-                            console.log(`Cotización guardada para la empresa ${empresa.codempresa} en la fecha ${fechaStr} a las ${horaStr}`);
-                        } else {
-                            console.log(`No se pudo obtener cotización para la empresa ${empresa.codempresa} en la fecha ${fechaStr} a las ${horaStr}`);
-                        }
-                    } else {
-                        console.log(`Cotización ya existe para la empresa ${empresa.codempresa} en la fecha ${fechaStr} a las ${horaStr}`);
-                    }
-                }
-            }
-        }
-    } catch (error) {
-        console.error('Error al obtener cotizaciones desde el inicio del año:', error);
-        throw new HttpException('Error al obtener las cotizaciones', HttpStatus.INTERNAL_SERVER_ERROR);
-    }
-}
-
-*/ 
