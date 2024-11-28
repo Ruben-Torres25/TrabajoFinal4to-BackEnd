@@ -24,12 +24,12 @@ export class CotizacionService {
   async obtenerTodasLasCotizaciones(): Promise<CotizacionDto[]> {
     try {
       const empresas = await this.empresaRepository.find();
-      const { fecha, hora } = DateUtils.getFechaHoraActual(); // Obtén fecha y hora aquí
+      const { fecha, hora } = DateUtils.getFechaHoraActual(); 
       const promises = empresas.map(empresa =>
         this.obtenerCotizacionEmpresa(empresa.codempresa, fecha, hora)
       );
 
-      // Espera a que todas las promesas se resuelvan
+      
       const cotizaciones = await Promise.all(promises);
       return cotizaciones;
     } catch (error) {

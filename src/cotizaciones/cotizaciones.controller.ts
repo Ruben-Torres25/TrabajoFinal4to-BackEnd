@@ -17,7 +17,6 @@ export class CotizacionController {
       return { message: 'Ejecutando cron para obtener cotizaciones ahora.' };
   }
 
-
   @Get(':codigoEmpresa/cotizacion') 
   async obtenerCotizacionEmpresa(
     @Param('codigoEmpresa') codigoEmpresa: string,

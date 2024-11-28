@@ -30,7 +30,6 @@ export class EmpresaService {
 
   async findByCodempresa(codempresa: string) {
     try {
-      // Verificar si la empresa ya existe en la base de datos
       const empresaExistente = await this.indiceRepository.findOne({
         where: { codempresa: codempresa }
       });

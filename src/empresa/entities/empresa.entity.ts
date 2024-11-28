@@ -1,4 +1,5 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Cotizacion } from 'src/cotizaciones/entitis/cotizacion.entity';
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity('empresas') 
 export class Empresa {
@@ -35,7 +36,6 @@ export class Empresa {
   })
   public cantidadAcciones: bigint;
   cotizaciones: any;
-
   
   constructor(partial?: Partial<Empresa>) {
     if (partial) {

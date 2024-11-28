@@ -8,6 +8,7 @@ import {
   JoinColumn,
   Unique,
   Index,
+  OneToMany,
 } from 'typeorm';
 
 @Entity('cotizaciones')
