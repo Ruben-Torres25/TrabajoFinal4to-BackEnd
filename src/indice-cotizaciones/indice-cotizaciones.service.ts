@@ -23,7 +23,7 @@ export class CotizacionIndiceService {
     private readonly indiceRepository: Repository<Indice>,
   ) { }
 
-
+ 
 
 
   private calcularSumaYConteo(cotizaciones: Cotizacion[]): { suma: number; conteo: number } {
@@ -241,10 +241,8 @@ export class CotizacionIndiceService {
     try {
 
       const cotizacionesExistentes = await this.cotizacionIndiceRepository.find();
-      console.log('EXISTENTES',cotizacionesExistentes)
      
       const cotizacionesIBOV = await this.obtenerCotizacionesIBOV();
-      console.log('IBOV COTIZACIOENS',cotizacionesIBOV)
       
       const cotizacionesIBOVSet = new Set(
         cotizacionesIBOV.map(cotizacion => `${cotizacion.fecha}-${cotizacion.hora}`)

@@ -197,9 +197,7 @@ let CotizacionIndiceService = CotizacionIndiceService_1 = class CotizacionIndice
     async verificarYPublicarCotizacionesIBOV() {
         try {
             const cotizacionesExistentes = await this.cotizacionIndiceRepository.find();
-            console.log('EXISTENTES', cotizacionesExistentes);
             const cotizacionesIBOV = await this.obtenerCotizacionesIBOV();
-            console.log('IBOV COTIZACIOENS', cotizacionesIBOV);
             const cotizacionesIBOVSet = new Set(cotizacionesIBOV.map(cotizacion => `${cotizacion.fecha}-${cotizacion.hora}`));
             const cotizacionesAFaltar = [];
             for (const cotizacion of cotizacionesExistentes) {

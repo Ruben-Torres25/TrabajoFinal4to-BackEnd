@@ -13,9 +13,11 @@ exports.CotizacionCronService = void 0;
 const common_1 = require("@nestjs/common");
 const schedule_1 = require("@nestjs/schedule");
 const cotizaciones_service_1 = require("../cotizaciones/cotizaciones.service");
+const indice_cotizaciones_service_1 = require("../indice-cotizaciones/indice-cotizaciones.service");
 let CotizacionCronService = class CotizacionCronService {
-    constructor(cotizacionService) {
+    constructor(cotizacionService, cotizacionIndiceService) {
         this.cotizacionService = cotizacionService;
+        this.cotizacionIndiceService = cotizacionIndiceService;
     }
     async handleCronObtenerCotizacionesDesdeInicioDelAno() {
         await this.ejecutarObtenerCotizacionesDesdeInicioDelAno();
@@ -33,6 +35,9 @@ let CotizacionCronService = class CotizacionCronService {
     async ejecutarAhora() {
         await this.ejecutarObtenerCotizacionesDesdeInicioDelAno();
     }
+    async handleCronVerificarYPublicarCotizacionesIBOV() {
+        await this.cotizacionIndiceService.verificarYPublicarCotizacionesIBOV();
+    }
 };
 exports.CotizacionCronService = CotizacionCronService;
 __decorate([
@@ -41,8 +46,15 @@ __decorate([
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
 ], CotizacionCronService.prototype, "handleCronObtenerCotizacionesDesdeInicioDelAno", null);
+__decorate([
+    (0, schedule_1.Cron)('5 * * * *'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], CotizacionCronService.prototype, "handleCronVerificarYPublicarCotizacionesIBOV", null);
 exports.CotizacionCronService = CotizacionCronService = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [cotizaciones_service_1.CotizacionService])
+    __metadata("design:paramtypes", [cotizaciones_service_1.CotizacionService,
+        indice_cotizaciones_service_1.CotizacionIndiceService])
 ], CotizacionCronService);
 //# sourceMappingURL=cron.service.js.map

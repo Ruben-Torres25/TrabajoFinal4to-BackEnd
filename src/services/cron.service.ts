@@ -1,11 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { Cron } from '@nestjs/schedule';
 import { CotizacionService } from 'src/cotizaciones/cotizaciones.service';
+import { CotizacionIndiceService } from 'src/indice-cotizaciones/indice-cotizaciones.service';
 
 @Injectable()
 export class CotizacionCronService {
    constructor(
        private readonly cotizacionService: CotizacionService,
+       private readonly cotizacionIndiceService: CotizacionIndiceService,
    ) {}
 
   
@@ -13,7 +15,6 @@ export class CotizacionCronService {
    async handleCronObtenerCotizacionesDesdeInicioDelAno() {
        await this.ejecutarObtenerCotizacionesDesdeInicioDelAno();
    }
-
    
    async ejecutarObtenerCotizacionesDesdeInicioDelAno() {
        try {
@@ -24,9 +25,14 @@ export class CotizacionCronService {
            console.error('Error al obtener cotizaciones desde el inicio del año:', error);
        }
    }
-
    // ejecutar el cron manualmente para test
    async ejecutarAhora() {
        await this.ejecutarObtenerCotizacionesDesdeInicioDelAno();
    }
+ 
+
+   @Cron('5 * * * *') 
+   async handleCronVerificarYPublicarCotizacionesIBOV() {
+    await this.cotizacionIndiceService.verificarYPublicarCotizacionesIBOV();
+  }
 }
