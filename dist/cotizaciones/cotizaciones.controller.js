@@ -21,9 +21,21 @@ let CotizacionController = class CotizacionController {
         this.cotizacionService = cotizacionService;
         this.cotizacionCronService = cotizacionCronService;
     }
+    async obtenerPromedioCotizacionesPorDia(codempresa) {
+        try {
+            const promedios = await this.cotizacionService.obtenerPromedioCotizacionesPorDia(codempresa);
+            return promedios;
+        }
+        catch (error) {
+            throw new common_1.HttpException(error.message, common_1.HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
     async ejecutarCotizaciones() {
         await this.cotizacionCronService.ejecutarAhora();
         return { message: 'Ejecutando cron para obtener cotizaciones ahora.' };
+    }
+    async obtenerCotizacionesPorEmpresa(codempresa) {
+        return await this.cotizacionService.obtenerCotizacionesPorEmpresa(codempresa);
     }
     async obtenerCotizacionEmpresa(codigoEmpresa, fecha, hora) {
         return this.cotizacionService.obtenerCotizacionEmpresa(codigoEmpresa, fecha, hora);
@@ -34,11 +46,25 @@ let CotizacionController = class CotizacionController {
 };
 exports.CotizacionController = CotizacionController;
 __decorate([
+    (0, common_1.Get)(':codempresa/promedio-cotizacion'),
+    __param(0, (0, common_1.Param)('codempresa')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], CotizacionController.prototype, "obtenerPromedioCotizacionesPorDia", null);
+__decorate([
     (0, common_1.Get)('ejecutar-cotizaciones'),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
 ], CotizacionController.prototype, "ejecutarCotizaciones", null);
+__decorate([
+    (0, common_1.Get)(':codempresa/cotizaciones'),
+    __param(0, (0, common_1.Param)('codempresa')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], CotizacionController.prototype, "obtenerCotizacionesPorEmpresa", null);
 __decorate([
     (0, common_1.Get)(':codigoEmpresa/cotizacion'),
     __param(0, (0, common_1.Param)('codigoEmpresa')),

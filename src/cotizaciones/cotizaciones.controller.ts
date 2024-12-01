@@ -1,4 +1,4 @@
-import { Controller, Get, Param, Query } from '@nestjs/common';
+import { Controller, Get, HttpException, HttpStatus, Param, Query } from '@nestjs/common';
 import { CotizacionService } from './cotizaciones.service';
 import { CotizacionDto } from './dto/cotizacion.dto';
 import { CotizacionCronService } from 'src/services/cron.service';
@@ -8,16 +8,35 @@ import { CotizacionCronService } from 'src/services/cron.service';
 export class CotizacionController {
   constructor(private readonly cotizacionService: CotizacionService,
     private readonly cotizacionCronService: CotizacionCronService
-  ) {}
+  ) { }
+  
 
+  @Get(':codempresa/promedio-cotizacion')
+  async obtenerPromedioCotizacionesPorDia(
+    @Param('codempresa') codempresa: string,
+  ): Promise<{ fecha: string; promedio: number }[]> {
+    try {
+      const promedios = await this.cotizacionService.obtenerPromedioCotizacionesPorDia(codempresa);
+      return promedios; // Retorna los promedios en un array de objetos
+    } catch (error) {
+      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
 
   @Get('ejecutar-cotizaciones')
   async ejecutarCotizaciones() {
-      await this.cotizacionCronService.ejecutarAhora();
-      return { message: 'Ejecutando cron para obtener cotizaciones ahora.' };
+    await this.cotizacionCronService.ejecutarAhora();
+    return { message: 'Ejecutando cron para obtener cotizaciones ahora.' };
   }
 
-  @Get(':codigoEmpresa/cotizacion') 
+  @Get(':codempresa/cotizaciones')
+  async obtenerCotizacionesPorEmpresa(
+    @Param('codempresa') codempresa: string,
+  ): Promise<CotizacionDto[]> {
+    return await this.cotizacionService.obtenerCotizacionesPorEmpresa(codempresa);
+  }
+
+  @Get(':codigoEmpresa/cotizacion')
   async obtenerCotizacionEmpresa(
     @Param('codigoEmpresa') codigoEmpresa: string,
     @Query('fecha') fecha: string,

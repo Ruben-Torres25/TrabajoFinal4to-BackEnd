@@ -8,7 +8,12 @@ export declare class CotizacionService {
     private apiUrl;
     private brazilTimezone;
     constructor(cotizacionRepository: Repository<Cotizacion>, empresaRepository: Repository<Empresa>);
+    obtenerPromedioCotizacionesPorDia(codigoEmpresa: string): Promise<{
+        fecha: string;
+        promedio: number;
+    }[]>;
     obtenerTodasLasCotizaciones(): Promise<CotizacionDto[]>;
+    obtenerCotizacionesPorEmpresa(codigoEmpresa: string): Promise<CotizacionDto[]>;
     obtenerCotizacionEmpresa(codigoEmpresa: string, fecha: string, hora: string): Promise<CotizacionDto>;
     obtenerCotizacionesRango(codempresa: string, fechaDesde: string, fechaHasta: string): Promise<any>;
     obtenerCotizacionesDesdeInicioDelAno(): Promise<void>;

@@ -21,6 +21,51 @@ export class CotizacionService {
   ) { }
 
 
+  async obtenerPromedioCotizacionesPorDia(codigoEmpresa: string): Promise<{ fecha: string; promedio: number }[]> {
+    try {
+      // Obtener todas las cotizaciones de la empresa
+      const cotizaciones = await this.cotizacionRepository.find({
+        where: {
+          empresa: { codempresa: codigoEmpresa },
+        },
+      });
+
+      // Verificar si hay cotizaciones
+      if (cotizaciones.length === 0) {
+        throw new HttpException('No se encontraron cotizaciones para la empresa especificada', HttpStatus.NOT_FOUND);
+      }
+
+      // Agrupar cotizaciones por fecha
+      const cotizacionesPorFecha = cotizaciones.reduce((acc, cotizacion) => {
+        const fecha = new Date(cotizacion.fecha).toISOString().substring(0, 10); // Formato yyyy-mm-dd
+        if (!acc[fecha]) {
+          acc[fecha] = [];
+        }
+        acc[fecha].push(cotizacion.cotization); // Asegúrate de que cotization sea un número
+        return acc;
+      }, {});
+
+      // Calcular el promedio por día
+      const promediosPorDia = Object.keys(cotizacionesPorFecha).map(fecha => {
+        const cotizacionesDelDia = cotizacionesPorFecha[fecha];
+        
+        if (cotizacionesDelDia.length === 0) {
+          return { fecha, promedio: 0 }; // O manejarlo de otra manera
+        }
+
+        const suma = cotizacionesDelDia.reduce((total, valor) => total + (parseFloat(valor) || 0), 0);
+        const promedio = suma / cotizacionesDelDia.length;
+        return { fecha, promedio: parseFloat(promedio.toFixed(2)) }; // Redondear a dos decimales
+      });
+
+      return promediosPorDia;
+    } catch (error) {
+      console.error(error);
+      throw new HttpException('Error al obtener los promedios de cotizaciones', HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
+
+
   async obtenerTodasLasCotizaciones(): Promise<CotizacionDto[]> {
     try {
       const empresas = await this.empresaRepository.find();
@@ -38,9 +83,28 @@ export class CotizacionService {
     }
   }
 
-
-
-
+  async obtenerCotizacionesPorEmpresa(codigoEmpresa: string): Promise<CotizacionDto[]> {
+    try {
+      const cotizaciones = await this.cotizacionRepository.find({
+        where: {
+          empresa: {
+            codempresa: codigoEmpresa,
+          },
+        },
+      });
+  
+      return cotizaciones.map((cotizacion) => ({
+        id: cotizacion.id.toString(),
+        fecha: new Date(cotizacion.fecha).toISOString().substring(0, 10), 
+        hora: cotizacion.hora,
+        dateUTC: new Date(cotizacion.fecha).toISOString(), 
+        cotization: cotizacion.cotization.toString(),
+      }));
+    } catch (error) {
+      console.error(error);
+      throw new HttpException('Error al obtener las cotizaciones de la empresa', HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
 
 
   async obtenerCotizacionEmpresa(codigoEmpresa: string, fecha: string, hora: string): Promise<CotizacionDto> {
@@ -75,7 +139,7 @@ export class CotizacionService {
   
       const guardado = this.cotizacionRepository.create({
         fecha: new Date(fechaLocal),
-        hora: horaLocal, 
+        hora: horaLocal,
         cotization: parseFloat(parseFloat(cotizacionIndividual.cotization).toFixed(2)),
         empresa: empresa,
       });
