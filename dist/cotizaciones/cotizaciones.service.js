@@ -28,6 +28,26 @@ let CotizacionService = class CotizacionService {
         this.apiUrl = 'http://ec2-54-145-211-254.compute-1.amazonaws.com:3000/';
         this.brazilTimezone = 'America/Sao_Paulo';
     }
+    async obtenerUltimosTresDiasCotizaciones(codempresa) {
+        try {
+            const fechaDesde = moment().subtract(3, 'days').startOf('day').toDate();
+            const fechaHasta = new Date();
+            const cotizaciones = await this.cotizacionRepository.find({
+                where: {
+                    fecha: (0, typeorm_2.Between)(fechaDesde, fechaHasta),
+                    empresa: { codempresa: codempresa },
+                },
+                order: {
+                    fecha: 'DESC',
+                },
+            });
+            return cotizaciones;
+        }
+        catch (error) {
+            console.error(error);
+            throw new common_1.HttpException('Error al obtener las cotizaciones', common_1.HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
     async obtenerPromedioCotizacionesPorDia(codigoEmpresa) {
         try {
             const cotizaciones = await this.cotizacionRepository.find({

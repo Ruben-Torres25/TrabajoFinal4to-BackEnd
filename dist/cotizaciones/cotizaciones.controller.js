@@ -21,6 +21,14 @@ let CotizacionController = class CotizacionController {
         this.cotizacionService = cotizacionService;
         this.cotizacionCronService = cotizacionCronService;
     }
+    async obtenerUltimosTresDiasCotizaciones(codempresa) {
+        try {
+            return await this.cotizacionService.obtenerUltimosTresDiasCotizaciones(codempresa);
+        }
+        catch (error) {
+            throw new common_1.HttpException(error.message, common_1.HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
     async obtenerPromedioCotizacionesPorDia(codempresa) {
         try {
             const promedios = await this.cotizacionService.obtenerPromedioCotizacionesPorDia(codempresa);
@@ -45,6 +53,13 @@ let CotizacionController = class CotizacionController {
     }
 };
 exports.CotizacionController = CotizacionController;
+__decorate([
+    (0, common_1.Get)(':codempresa/ultimos-tres-dias'),
+    __param(0, (0, common_1.Param)('codempresa')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], CotizacionController.prototype, "obtenerUltimosTresDiasCotizaciones", null);
 __decorate([
     (0, common_1.Get)(':codempresa/promedio-cotizacion'),
     __param(0, (0, common_1.Param)('codempresa')),

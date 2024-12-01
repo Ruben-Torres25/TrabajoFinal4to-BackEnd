@@ -3,7 +3,7 @@ import clienteAxios from 'axios';
 import { CotizacionDto } from './dto/cotizacion.dto';
 import { Cotizacion } from './entitis/cotizacion.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { In, Repository } from 'typeorm';
+import { Between, In, Repository } from 'typeorm';
 import * as moment from 'moment-timezone';
 import { Empresa } from 'src/empresa/entities/empresa.entity';
 import DateUtils from 'src/utils/DateUtils';
@@ -19,8 +19,32 @@ export class CotizacionService {
     @InjectRepository(Empresa)
     private readonly empresaRepository: Repository<Empresa>,
   ) { }
+  
 
+  async obtenerUltimosTresDiasCotizaciones(codempresa: string): Promise<Cotizacion[]> {
+    try {
+      // Calcular la fecha de hace 3 días
+      const fechaDesde = moment().subtract(3, 'days').startOf('day').toDate();
+      const fechaHasta = new Date(); // Fecha actual
 
+      // Realizar la consulta para obtener las cotizaciones en el rango de fechas para la empresa específica
+      const cotizaciones = await this.cotizacionRepository.find({
+        where: {
+          fecha: Between(fechaDesde, fechaHasta), // Usar Between para el rango
+          empresa: { codempresa: codempresa }, // Filtrar por el código de la empresa
+        },
+        order: {
+          fecha: 'DESC',
+        },
+      });
+
+      return cotizaciones;
+    } catch (error) {
+      console.error(error);
+      throw new HttpException('Error al obtener las cotizaciones', HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
+  
   async obtenerPromedioCotizacionesPorDia(codigoEmpresa: string): Promise<{ fecha: string; promedio: number }[]> {
     try {
       // Obtener todas las cotizaciones de la empresa

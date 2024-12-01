@@ -2,6 +2,7 @@ import { Controller, Get, HttpException, HttpStatus, Param, Query } from '@nestj
 import { CotizacionService } from './cotizaciones.service';
 import { CotizacionDto } from './dto/cotizacion.dto';
 import { CotizacionCronService } from 'src/services/cron.service';
+import { Cotizacion } from './entitis/cotizacion.entity';
 
 
 @Controller('empresas')
@@ -10,6 +11,14 @@ export class CotizacionController {
     private readonly cotizacionCronService: CotizacionCronService
   ) { }
   
+  @Get(':codempresa/ultimos-tres-dias')
+  async obtenerUltimosTresDiasCotizaciones(@Param('codempresa') codempresa: string): Promise<Cotizacion[]> {
+    try {
+      return await this.cotizacionService.obtenerUltimosTresDiasCotizaciones(codempresa);
+    } catch (error) {
+      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
 
   @Get(':codempresa/promedio-cotizacion')
   async obtenerPromedioCotizacionesPorDia(
