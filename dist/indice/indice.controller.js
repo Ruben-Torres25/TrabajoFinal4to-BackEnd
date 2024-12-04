@@ -31,13 +31,13 @@ let IndiceController = class IndiceController {
 };
 exports.IndiceController = IndiceController;
 __decorate([
-    (0, common_1.Post)('obtenerIndices'),
+    (0, common_1.Post)('obtenerYGuardarIndices'),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
 ], IndiceController.prototype, "obtenerIndices", null);
 __decorate([
-    (0, common_1.Get)(),
+    (0, common_1.Get)('obtenerIndices'),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)

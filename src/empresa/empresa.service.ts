@@ -39,7 +39,7 @@ export class EmpresaService {
       }
   
       const response = await clienteAxios.get(
-        `${this.apiUrl}empresas/${codempresa}/details`,
+        `${this.apiUrl}cotizaciones/${codempresa}/details`,
       );
       const empresas = response.data;
       

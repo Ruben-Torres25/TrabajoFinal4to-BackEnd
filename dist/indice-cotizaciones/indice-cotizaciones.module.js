@@ -14,6 +14,7 @@ const indice_cotizaciones_service_1 = require("./indice-cotizaciones.service");
 const indice_cotizacione_entity_1 = require("./entities/indice-cotizacione.entity");
 const indice_entity_1 = require("../indice/entities/indice.entity");
 const cotizacion_entity_1 = require("../cotizaciones/entitis/cotizacion.entity");
+const indice_service_1 = require("../indice/indice.service");
 let IndiceCotizacionesModule = class IndiceCotizacionesModule {
 };
 exports.IndiceCotizacionesModule = IndiceCotizacionesModule;
@@ -23,7 +24,7 @@ exports.IndiceCotizacionesModule = IndiceCotizacionesModule = __decorate([
             typeorm_1.TypeOrmModule.forFeature([indice_cotizacione_entity_1.CotizacionIndice, indice_entity_1.Indice, cotizacion_entity_1.Cotizacion]),
         ],
         controllers: [indice_cotizaciones_controller_1.CotizacionIndiceController],
-        providers: [indice_cotizaciones_service_1.CotizacionIndiceService],
+        providers: [indice_cotizaciones_service_1.CotizacionIndiceService, indice_service_1.IndiceService],
         exports: [indice_cotizaciones_service_1.CotizacionIndiceService],
     })
 ], IndiceCotizacionesModule);

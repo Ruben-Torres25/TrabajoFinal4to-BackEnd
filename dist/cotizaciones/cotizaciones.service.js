@@ -28,6 +28,79 @@ let CotizacionService = class CotizacionService {
         this.apiUrl = 'http://ec2-54-145-211-254.compute-1.amazonaws.com:3000/';
         this.brazilTimezone = 'America/Sao_Paulo';
     }
+    async obtenerPromedioTotalPorEmpresa() {
+        try {
+            const promediosPorDia = await this.obtenerPromedioCotizacionesPorDiaDeTodasLasEmpresas();
+            const promediosTotales = {};
+            for (const promedio of promediosPorDia) {
+                const { codempresa, empresaNombre, promedio: valorPromedio } = promedio;
+                if (!promediosTotales[codempresa]) {
+                    promediosTotales[codempresa] = { suma: 0, conteo: 0, empresaNombre };
+                }
+                promediosTotales[codempresa].suma += valorPromedio;
+                promediosTotales[codempresa].conteo += 1;
+            }
+            const resultados = Object.keys(promediosTotales).map(codempresa => {
+                const { suma, conteo, empresaNombre } = promediosTotales[codempresa];
+                const promedioTotal = suma / conteo;
+                return { codempresa, empresaNombre, promedioTotal: parseFloat(promedioTotal.toFixed(2)) };
+            });
+            return resultados;
+        }
+        catch (error) {
+            console.error(error);
+            throw new common_1.HttpException('Error al obtener el promedio total por empresa', common_1.HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+    async obtenerPromedioCotizacionesUltimoMesAgrupadosPorEmpresa() {
+        try {
+            const promediosPorDia = await this.obtenerPromedioCotizacionesPorDiaDeTodasLasEmpresas();
+            const fechaActual = moment();
+            const fechaHaceUnMes = moment().subtract(1, 'months');
+            const promediosAgrupados = {};
+            promediosPorDia.forEach(promedio => {
+                const fechaCotizacion = moment(promedio.fecha);
+                if (fechaCotizacion.isBetween(fechaHaceUnMes, fechaActual, null, '[]')) {
+                    const { codempresa, empresaNombre } = promedio;
+                    if (!promediosAgrupados[codempresa]) {
+                        promediosAgrupados[codempresa] = { empresaNombre, promedios: [] };
+                    }
+                    promediosAgrupados[codempresa].promedios.push({
+                        fecha: promedio.fecha,
+                        promedio: promedio.promedio,
+                    });
+                }
+            });
+            return Object.keys(promediosAgrupados).map(codempresa => ({
+                codempresa,
+                empresaNombre: promediosAgrupados[codempresa].empresaNombre,
+                promedios: promediosAgrupados[codempresa].promedios,
+            }));
+        }
+        catch (error) {
+            console.error(error);
+            throw new common_1.HttpException('Error al obtener los promedios de cotizaciones del último mes agrupados por empresa', common_1.HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+    async obtenerPromedioCotizacionesPorDiaDeTodasLasEmpresas() {
+        try {
+            const empresas = await this.empresaRepository.find();
+            const resultados = [];
+            for (const empresa of empresas) {
+                const promedios = await this.obtenerPromedioCotizacionesPorDia(empresa.codempresa);
+                resultados.push(...promedios.map(promedio => ({
+                    codempresa: empresa.codempresa,
+                    nombre: empresa.empresaNombre,
+                    ...promedio
+                })));
+            }
+            return resultados;
+        }
+        catch (error) {
+            console.error(error);
+            throw new common_1.HttpException('Error al obtener los promedios de cotizaciones', common_1.HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
     async obtenerUltimosTresDiasCotizaciones(codempresa) {
         try {
             const fechaDesde = moment().subtract(3, 'days').startOf('day').toDate();
@@ -38,7 +111,7 @@ let CotizacionService = class CotizacionService {
                     empresa: { codempresa: codempresa },
                 },
                 order: {
-                    fecha: 'DESC',
+                    fecha: 'ASC',
                 },
             });
             return cotizaciones;
@@ -129,7 +202,7 @@ let CotizacionService = class CotizacionService {
             if (cotizacionExistente) {
                 throw new common_1.HttpException('La empresa ya existe en tu base de datos', common_1.HttpStatus.CONFLICT);
             }
-            const response = await axios_1.default.get(`${this.apiUrl}empresas/${codigoEmpresa}/cotizacion`, {
+            const response = await axios_1.default.get(`${this.apiUrl}cotizaciones/${codigoEmpresa}/cotizacion`, {
                 params: { fecha, hora },
             });
             const cotizacionIndividual = response.data;
@@ -155,7 +228,7 @@ let CotizacionService = class CotizacionService {
     }
     async obtenerCotizacionesRango(codempresa, fechaDesde, fechaHasta) {
         try {
-            const response = await axios_1.default.get(`${this.apiUrl}empresas/${codempresa}/cotizaciones?fechaDesde=${fechaDesde}&fechaHasta=${fechaHasta}`);
+            const response = await axios_1.default.get(`${this.apiUrl}cotizaciones/${codempresa}/cotizaciones?fechaDesde=${fechaDesde}&fechaHasta=${fechaHasta}`);
             return response.data;
         }
         catch (error) {
@@ -165,10 +238,11 @@ let CotizacionService = class CotizacionService {
     }
     async obtenerCotizacionesDesdeInicioDelAno() {
         try {
-            const fechaInicio = moment().startOf('year').toDate();
-            const fechaActual = new Date();
+            const fechaInicio = moment().startOf('year').format('YYYY-MM-DD') + 'T00:00';
+            const fechaActual = moment().endOf('day').format('YYYY-MM-DD') + 'T23:59';
             const empresas = await this.empresaRepository.find();
-            for (const empresa of empresas) {
+            const cotizacionesParaGuardar = [];
+            const promises = empresas.map(async (empresa) => {
                 const ultimaCotizacion = await this.cotizacionRepository.findOne({
                     where: { empresa: { id: empresa.id } },
                     order: { fecha: 'DESC' },
@@ -179,36 +253,46 @@ let CotizacionService = class CotizacionService {
                     for (let hora = 9; hora <= 15; hora++) {
                         const horaStr = hora.toString().padStart(2, '0') + ':00';
                         try {
-                            const cotizacion = await axios_1.default.get(`${this.apiUrl}empresas/${empresa.codempresa}/cotizacion`, {
-                                params: { fecha: fechaStr, hora: horaStr },
-                            });
                             const cotizacionExistente = await this.cotizacionRepository.findOne({
                                 where: {
                                     empresa: { id: empresa.id },
-                                    fecha: moment(fechaStr).tz(this.brazilTimezone).toDate(),
+                                    fecha: moment(`${fechaStr}T${horaStr}`).tz('America/Sao_Paulo').toDate(),
                                     hora: horaStr,
                                 },
                             });
-                            if (!cotizacionExistente) {
-                                const guardado = this.cotizacionRepository.create({
-                                    fecha: moment(cotizacion.data.fecha).tz(this.brazilTimezone).toDate(),
-                                    hora: cotizacion.data.hora,
-                                    cotization: parseFloat(cotizacion.data.cotization),
-                                    empresa: empresa,
-                                });
-                                await this.cotizacionRepository.save(guardado);
-                                console.log(`Cotización guardada para la empresa ${empresa.codempresa} en la fecha ${fechaStr} a las ${horaStr}`);
-                            }
-                            else {
+                            if (cotizacionExistente) {
                                 console.log(`Cotización ya existe para la empresa ${empresa.codempresa} en la fecha ${fechaStr} a las ${horaStr}`);
+                                continue;
                             }
+                            const cotizacion = await axios_1.default.get(`${this.apiUrl}empresas/${empresa.codempresa}/cotizaciones`, {
+                                params: { fechaDesde: `${fechaStr}T${horaStr}`, fechaHasta: `${fechaStr}T${horaStr}` },
+                            });
+                            const cotizacionData = cotizacion.data[0];
+                            if (!cotizacionData) {
+                                console.error(`No se encontraron datos de cotización para la empresa ${empresa.codempresa} en la fecha ${fechaStr} a las ${horaStr}`);
+                                continue;
+                            }
+                            cotizacionesParaGuardar.push(this.cotizacionRepository.create({
+                                fecha: moment(cotizacionData.fecha).tz('America/Sao_Paulo').toDate(),
+                                hora: horaStr,
+                                cotization: parseFloat(cotizacionData.cotization),
+                                empresa: empresa,
+                            }));
                         }
                         catch (error) {
                             console.error(`Error al obtener cotización para la empresa ${empresa.codempresa} en la fecha ${fechaStr} a las ${horaStr}:`, error);
                         }
                     }
                 }
+            });
+            await Promise.all(promises);
+            const batchSize = 1000;
+            for (let i = 0; i < cotizacionesParaGuardar.length; i += batchSize) {
+                const batch = cotizacionesParaGuardar.slice(i, i + batchSize);
+                await this.cotizacionRepository.save(batch);
+                console.log(`Guardadas ${batch.length} cotizaciones en la base de datos.`);
             }
+            console.log('Todas las cotizaciones han sido obtenidas y guardadas exitosamente.');
         }
         catch (error) {
             console.error('Error al obtener cotizaciones desde el inicio del año:', error);

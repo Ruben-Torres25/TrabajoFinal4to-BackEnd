@@ -12,9 +12,11 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.CotizacionIndiceController = void 0;
 const common_1 = require("@nestjs/common");
 const indice_cotizaciones_service_1 = require("./indice-cotizaciones.service");
+const indice_service_1 = require("../indice/indice.service");
 let CotizacionIndiceController = class CotizacionIndiceController {
-    constructor(cotizacionIndiceService) {
+    constructor(cotizacionIndiceService, indiceService) {
         this.cotizacionIndiceService = cotizacionIndiceService;
+        this.indiceService = indiceService;
     }
     async obtenerCotizacionesAgrupadas() {
         return this.cotizacionIndiceService.obtenerCotizacionesAgrupadas();
@@ -30,7 +32,7 @@ let CotizacionIndiceController = class CotizacionIndiceController {
     }
     async publicarTodas() {
         try {
-            const result = await this.cotizacionIndiceService.publicarTodasLasCotizaciones();
+            const result = await this.cotizacionIndiceService.verificarYPublicarCotizacionesIBOV();
             return result;
         }
         catch (error) {
@@ -40,13 +42,64 @@ let CotizacionIndiceController = class CotizacionIndiceController {
     async obtenerCotizacionesIBOV() {
         return await this.cotizacionIndiceService.obtenerCotizacionesIBOV();
     }
-    async verificarYPublicarCotizacionesIBOV() {
+    async obtenerCotizacionesPorIndices() {
         try {
-            await this.cotizacionIndiceService.verificarYPublicarCotizacionesIBOV();
-            return { message: 'Verificación y publicación de cotizaciones IBOV completadas exitosamente.' };
+            const cotizaciones = await this.cotizacionIndiceService.obtenerCotizacionesPorIndices();
+            return cotizaciones;
         }
         catch (error) {
-            throw new common_1.HttpException('Error al verificar y publicar cotizaciones IBOV', common_1.HttpStatus.INTERNAL_SERVER_ERROR);
+            throw new common_1.HttpException('Error al obtener cotizaciones por índices', common_1.HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+    async guardarCotizacionesManualmente() {
+        try {
+            await this.cotizacionIndiceService.obtenerYGuardarCotizacionesPorIndices();
+            return { message: 'Cotizaciones obtenidas y guardadas exitosamente.' };
+        }
+        catch (error) {
+            throw new common_1.HttpException('Error al guardar las cotizaciones manualmente: ' + error.message, common_1.HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+    async obtenerPromedioCotizacionesPorDia() {
+        try {
+            const promedios = await this.cotizacionIndiceService.obtenerPromedioCotizacionesPorDiaDeTodosLosIndices();
+            return promedios;
+        }
+        catch (error) {
+            throw new common_1.HttpException('Error al obtener los promedios de cotizaciones por día', common_1.HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+    async obtenerCotizacionesUltimoMesPorIndices() {
+        return await this.cotizacionIndiceService.obtenerCotizacionesUltimoMesPorIndices();
+    }
+    async obtenerPromedioTotalSinTSE() {
+        try {
+            const promedios = await this.cotizacionIndiceService.calcularPromedioTotalPorIndiceSinTSE();
+            return promedios;
+        }
+        catch (error) {
+            throw new common_1.HttpException('Error al obtener el promedio total sin TSE', common_1.HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+    async obtenerPromedioTotalPorIndice() {
+        return await this.cotizacionIndiceService.calcularPromedioTotalPorIndice();
+    }
+    async obtenerCotizacionesUltimoMes() {
+        try {
+            const cotizacionesUltimoMes = await this.cotizacionIndiceService.obtenerCotizacionesUltimoMes();
+            return cotizacionesUltimoMes;
+        }
+        catch (error) {
+            throw new common_1.HttpException('Error al obtener las cotizaciones del último mes', common_1.HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+    async obtenerPromedioMensual() {
+        try {
+            const promediosMensuales = await this.cotizacionIndiceService.obtenerPromedioMensualCotizacionesIndices();
+            return promediosMensuales;
+        }
+        catch (error) {
+            throw new common_1.HttpException('Error al obtener el promedio mensual de cotizaciones de índices', common_1.HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 };
@@ -58,7 +111,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], CotizacionIndiceController.prototype, "obtenerCotizacionesAgrupadas", null);
 __decorate([
-    (0, common_1.Post)('calcular-promedios'),
+    (0, common_1.Get)('calcular-promedios'),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
@@ -76,13 +129,56 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], CotizacionIndiceController.prototype, "obtenerCotizacionesIBOV", null);
 __decorate([
-    (0, common_1.Post)('verificar-publicar-ibov'),
+    (0, common_1.Get)('por-indices'),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
-], CotizacionIndiceController.prototype, "verificarYPublicarCotizacionesIBOV", null);
+], CotizacionIndiceController.prototype, "obtenerCotizacionesPorIndices", null);
+__decorate([
+    (0, common_1.Post)('guardar-manualmente'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], CotizacionIndiceController.prototype, "guardarCotizacionesManualmente", null);
+__decorate([
+    (0, common_1.Get)('promedio-por-dia'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], CotizacionIndiceController.prototype, "obtenerPromedioCotizacionesPorDia", null);
+__decorate([
+    (0, common_1.Get)('ultimo-mes'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], CotizacionIndiceController.prototype, "obtenerCotizacionesUltimoMesPorIndices", null);
+__decorate([
+    (0, common_1.Get)('promedio-total-sin-tse'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], CotizacionIndiceController.prototype, "obtenerPromedioTotalSinTSE", null);
+__decorate([
+    (0, common_1.Get)('promedio-total-por-indice'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], CotizacionIndiceController.prototype, "obtenerPromedioTotalPorIndice", null);
+__decorate([
+    (0, common_1.Get)('ultimo-mes'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], CotizacionIndiceController.prototype, "obtenerCotizacionesUltimoMes", null);
+__decorate([
+    (0, common_1.Get)('promedio-mensual'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], CotizacionIndiceController.prototype, "obtenerPromedioMensual", null);
 exports.CotizacionIndiceController = CotizacionIndiceController = __decorate([
-    (0, common_1.Controller)('cotizaciones'),
-    __metadata("design:paramtypes", [indice_cotizaciones_service_1.CotizacionIndiceService])
+    (0, common_1.Controller)('IndiceCotizaciones'),
+    __metadata("design:paramtypes", [indice_cotizaciones_service_1.CotizacionIndiceService,
+        indice_service_1.IndiceService])
 ], CotizacionIndiceController);
 //# sourceMappingURL=indice-cotizaciones.controller.js.map

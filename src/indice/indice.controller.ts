@@ -6,13 +6,13 @@ export class IndiceController {
   constructor(private readonly indiceService: IndiceService) { }
 
   
-  @Post('obtenerIndices')
+  @Post('obtenerYGuardarIndices')
   async obtenerIndices() {
     return await this.indiceService.obtenerIndices();
   }
 
   
-  @Get()
+  @Get('obtenerIndices')
   async getAllIndices() {
     const indices = await this.indiceService.findAll();
     return indices.map((indice) => ({
