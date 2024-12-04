@@ -16,6 +16,8 @@ const app_service_1 = require("./app.service");
 const empresa_module_1 = require("./empresa/empresa.module");
 const cotizaciones_module_1 = require("./cotizaciones/cotizaciones.module");
 const cron_service_1 = require("./services/cron.service");
+const indice_module_1 = require("./indice/indice.module");
+const indice_cotizaciones_module_1 = require("./indice-cotizaciones/indice-cotizaciones.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -33,12 +35,14 @@ exports.AppModule = AppModule = __decorate([
                 username: process.env.MYSQL_USER,
                 password: process.env.MYSQL_PASSWORD,
                 database: process.env.MYSQL_DB,
-                synchronize: true,
+                synchronize: false,
                 entities: ['dist/**/*.entity.js'],
                 logging: true,
             }),
             empresa_module_1.EmpresaModule,
             cotizaciones_module_1.CotizacionModule,
+            indice_module_1.IndiceModule,
+            indice_cotizaciones_module_1.IndiceCotizacionesModule,
         ],
         controllers: [app_controller_1.AppController],
         providers: [app_service_1.AppService, cron_service_1.CotizacionCronService],

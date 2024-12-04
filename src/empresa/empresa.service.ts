@@ -30,7 +30,6 @@ export class EmpresaService {
 
   async findByCodempresa(codempresa: string) {
     try {
-      // Verificar si la empresa ya existe en la base de datos
       const empresaExistente = await this.indiceRepository.findOne({
         where: { codempresa: codempresa }
       });
@@ -40,7 +39,7 @@ export class EmpresaService {
       }
   
       const response = await clienteAxios.get(
-        `${this.apiUrl}empresas/${codempresa}/details`,
+        `${this.apiUrl}cotizaciones/${codempresa}/details`,
       );
       const empresas = response.data;
       

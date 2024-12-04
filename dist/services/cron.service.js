@@ -13,25 +13,33 @@ exports.CotizacionCronService = void 0;
 const common_1 = require("@nestjs/common");
 const schedule_1 = require("@nestjs/schedule");
 const cotizaciones_service_1 = require("../cotizaciones/cotizaciones.service");
+const indice_cotizaciones_service_1 = require("../indice-cotizaciones/indice-cotizaciones.service");
+const indice_service_1 = require("../indice/indice.service");
 let CotizacionCronService = class CotizacionCronService {
-    constructor(cotizacionService) {
+    constructor(cotizacionService, cotizacionIndiceService, indiceService) {
         this.cotizacionService = cotizacionService;
+        this.cotizacionIndiceService = cotizacionIndiceService;
+        this.indiceService = indiceService;
     }
-    async handleCronObtenerCotizacionesDesdeInicioDelAno() {
-        await this.ejecutarObtenerCotizacionesDesdeInicioDelAno();
+    async handleCronObtenerCotizacionesEmpresas() {
+        await this.cotizacionService.obtenerCotizacionesDesdeInicioDelAno();
+        console.log('se jecuto cron, se obtuvieron las cotizaciones de empresas');
     }
-    async ejecutarObtenerCotizacionesDesdeInicioDelAno() {
-        try {
-            console.log('Ejecutando cron para obtener cotizaciones desde el inicio del año:', new Date().toISOString());
-            await this.cotizacionService.obtenerCotizacionesDesdeInicioDelAno();
-            console.log('Cotizaciones desde el inicio del año han sido obtenidas correctamente.');
-        }
-        catch (error) {
-            console.error('Error al obtener cotizaciones desde el inicio del año:', error);
-        }
+    async handleCronObtenerIndices() {
+        await this.indiceService.obtenerIndices();
+        console.log('se ejecuto cron, se obtuvieron los indices');
     }
-    async ejecutarAhora() {
-        await this.ejecutarObtenerCotizacionesDesdeInicioDelAno();
+    async handleCronCalcularMiIndiceYGuardarloEnDB() {
+        await this.cotizacionIndiceService.calcularYGuardarPromedios();
+        console.log('se ejecuto cron, se calcularon y guardaron sus indicesCotizaciones');
+    }
+    async handleCronPublicarIndice() {
+        await this.cotizacionIndiceService.verificarYPublicarCotizacionesIBOV();
+        console.log('se ejecuto cron, se publicaron los nuevos indices cotizaciones de IBOV');
+    }
+    async handleCronObtenerIndicesDeLosDemas() {
+        await this.cotizacionIndiceService.obtenerYGuardarCotizacionesPorIndices();
+        console.log('se ejecuto cron, se obtuvieron y guardaron los indices obtuvidos de gempresa');
     }
 };
 exports.CotizacionCronService = CotizacionCronService;
@@ -40,9 +48,35 @@ __decorate([
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
-], CotizacionCronService.prototype, "handleCronObtenerCotizacionesDesdeInicioDelAno", null);
+], CotizacionCronService.prototype, "handleCronObtenerCotizacionesEmpresas", null);
+__decorate([
+    (0, schedule_1.Cron)('5 * * * *'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], CotizacionCronService.prototype, "handleCronObtenerIndices", null);
+__decorate([
+    (0, schedule_1.Cron)('10 * * * *'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], CotizacionCronService.prototype, "handleCronCalcularMiIndiceYGuardarloEnDB", null);
+__decorate([
+    (0, schedule_1.Cron)('15 * * * *'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], CotizacionCronService.prototype, "handleCronPublicarIndice", null);
+__decorate([
+    (0, schedule_1.Cron)('20 * * * *'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], CotizacionCronService.prototype, "handleCronObtenerIndicesDeLosDemas", null);
 exports.CotizacionCronService = CotizacionCronService = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [cotizaciones_service_1.CotizacionService])
+    __metadata("design:paramtypes", [cotizaciones_service_1.CotizacionService,
+        indice_cotizaciones_service_1.CotizacionIndiceService,
+        indice_service_1.IndiceService])
 ], CotizacionCronService);
 //# sourceMappingURL=cron.service.js.map

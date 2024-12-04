@@ -40,7 +40,7 @@ let EmpresaService = class EmpresaService {
             if (empresaExistente) {
                 throw new common_1.HttpException('La empresa ya existe en tu base de datos', common_1.HttpStatus.CONFLICT);
             }
-            const response = await axios_1.default.get(`${this.apiUrl}empresas/${codempresa}/details`);
+            const response = await axios_1.default.get(`${this.apiUrl}cotizaciones/${codempresa}/details`);
             const empresas = response.data;
             const guardado = this.indiceRepository.create({
                 codempresa: empresas.codempresa,

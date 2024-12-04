@@ -21,12 +21,65 @@ let CotizacionController = class CotizacionController {
         this.cotizacionService = cotizacionService;
         this.cotizacionCronService = cotizacionCronService;
     }
-    async ejecutarCotizaciones() {
-        await this.cotizacionCronService.ejecutarAhora();
-        return { message: 'Ejecutando cron para obtener cotizaciones ahora.' };
+    async obtenerPromedioCotizacionesUltimoMes() {
+        try {
+            const promedios = await this.cotizacionService.obtenerPromedioCotizacionesUltimoMesAgrupadosPorEmpresa();
+            return promedios;
+        }
+        catch (error) {
+            throw new common_1.HttpException('Error al obtener los promedios del último mes', common_1.HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+    async obtenerPromedioTotalPorEmpresa() {
+        try {
+            const promediosTotales = await this.cotizacionService.obtenerPromedioTotalPorEmpresa();
+            return promediosTotales;
+        }
+        catch (error) {
+            throw new common_1.HttpException('Error al obtener el promedio total por empresa', common_1.HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+    async obtenerPromedioCotizacionesPorDiaDeTodasLasEmpresas() {
+        try {
+            const promedios = await this.cotizacionService.obtenerPromedioCotizacionesPorDiaDeTodasLasEmpresas();
+            return promedios;
+        }
+        catch (error) {
+            throw new common_1.HttpException('Error al obtener los promedios de cotizaciones de todas las empresas', common_1.HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+    async obtenerUltimosTresDiasCotizaciones(codempresa) {
+        try {
+            return await this.cotizacionService.obtenerUltimosTresDiasCotizaciones(codempresa);
+        }
+        catch (error) {
+            throw new common_1.HttpException(error.message, common_1.HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+    async obtenerPromedioCotizacionesPorDia(codempresa) {
+        try {
+            const promedios = await this.cotizacionService.obtenerPromedioCotizacionesPorDia(codempresa);
+            return promedios;
+        }
+        catch (error) {
+            throw new common_1.HttpException(error.message, common_1.HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+    async obtenerCotizacionesPorEmpresa(codempresa) {
+        return await this.cotizacionService.obtenerCotizacionesPorEmpresa(codempresa);
     }
     async obtenerCotizacionEmpresa(codigoEmpresa, fecha, hora) {
         return this.cotizacionService.obtenerCotizacionEmpresa(codigoEmpresa, fecha, hora);
+    }
+    async obtenerCotizacionesDesdeInicioDelAno() {
+        try {
+            await this.cotizacionService.obtenerCotizacionesDesdeInicioDelAno();
+            return { message: 'Cotizaciones obtenidas y guardadas exitosamente.' };
+        }
+        catch (error) {
+            console.error(error);
+            throw new common_1.HttpException('Error al obtener las cotizaciones desde el inicio del año', common_1.HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
     async obtenerCotizacionesRango(codempresa, fechaDesde, fechaHasta) {
         return this.cotizacionService.obtenerCotizacionesRango(codempresa, fechaDesde, fechaHasta);
@@ -34,11 +87,44 @@ let CotizacionController = class CotizacionController {
 };
 exports.CotizacionController = CotizacionController;
 __decorate([
-    (0, common_1.Get)('ejecutar-cotizaciones'),
+    (0, common_1.Get)('promedio-ultimo-mes'),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
-], CotizacionController.prototype, "ejecutarCotizaciones", null);
+], CotizacionController.prototype, "obtenerPromedioCotizacionesUltimoMes", null);
+__decorate([
+    (0, common_1.Get)('total-por-empresa'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], CotizacionController.prototype, "obtenerPromedioTotalPorEmpresa", null);
+__decorate([
+    (0, common_1.Get)('promedio-todas-las-empresas'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], CotizacionController.prototype, "obtenerPromedioCotizacionesPorDiaDeTodasLasEmpresas", null);
+__decorate([
+    (0, common_1.Get)(':codempresa/ultimos-tres-dias'),
+    __param(0, (0, common_1.Param)('codempresa')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], CotizacionController.prototype, "obtenerUltimosTresDiasCotizaciones", null);
+__decorate([
+    (0, common_1.Get)(':codempresa/promedio-cotizacion'),
+    __param(0, (0, common_1.Param)('codempresa')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], CotizacionController.prototype, "obtenerPromedioCotizacionesPorDia", null);
+__decorate([
+    (0, common_1.Get)(':codempresa/cotizaciones'),
+    __param(0, (0, common_1.Param)('codempresa')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], CotizacionController.prototype, "obtenerCotizacionesPorEmpresa", null);
 __decorate([
     (0, common_1.Get)(':codigoEmpresa/cotizacion'),
     __param(0, (0, common_1.Param)('codigoEmpresa')),
@@ -49,6 +135,12 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], CotizacionController.prototype, "obtenerCotizacionEmpresa", null);
 __decorate([
+    (0, common_1.Get)('desde-inicio-del-ano'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], CotizacionController.prototype, "obtenerCotizacionesDesdeInicioDelAno", null);
+__decorate([
     (0, common_1.Get)(':codempresa/rango'),
     __param(0, (0, common_1.Param)('codempresa')),
     __param(1, (0, common_1.Query)('fechaDesde')),
@@ -58,7 +150,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], CotizacionController.prototype, "obtenerCotizacionesRango", null);
 exports.CotizacionController = CotizacionController = __decorate([
-    (0, common_1.Controller)('empresas'),
+    (0, common_1.Controller)('cotizaciones'),
     __metadata("design:paramtypes", [cotizaciones_service_1.CotizacionService,
         cron_service_1.CotizacionCronService])
 ], CotizacionController);
