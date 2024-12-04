@@ -24,33 +24,32 @@ export class CotizacionIndiceService {
     private readonly indiceRepository: Repository<Indice>,
     private readonly indiceService: IndiceService,
   ) { } 
-// IBOV
 
-  //funcion que obtiene las cotizaciones de los indices de la api
+
+  
   async obtenerCotizacionesPorIndices(): Promise<any[]> {
     try {
-      const fechaDesde = moment().startOf('year').format('YYYY-MM-DD') + 'T00:00'; // Fecha de inicio del año a las 00:00
-      const fechaHasta = moment().endOf('day').format('YYYY-MM-DD') + 'T23:59'; // Fecha actual a las 23:59
+      const fechaDesde = moment().startOf('year').format('YYYY-MM-DD') + 'T00:00'; 
+      const fechaHasta = moment().endOf('day').format('YYYY-MM-DD') + 'T23:59'; 
   
-      // Obtener todos los índices
+      
       const indices = await this.indiceService.findAll();
       
-      // Crear un array de promesas para las solicitudes
+      
       const cotizacionesPorIndicesPromises = indices.map(async (indice) => {
-        const codigoIndice = indice.codIndice; // Obtener el código del índice
+        const codigoIndice = indice.codIndice; 
   
-        // Construir la URL para la solicitud
         const url = `http://ec2-54-145-211-254.compute-1.amazonaws.com:3000/indices/${codigoIndice}/cotizaciones?fechaDesde=${fechaDesde}&fechaHasta=${fechaHasta}`;
   
-        // Realizar la solicitud a la API
+        
         const response = await axios.get(url);
         return { codigoIndice, cotizaciones: response.data }; // Suponiendo que la respuesta contiene las cotizaciones
       });
   
-      // Esperar a que todas las promesas se resuelvan
+      
       const cotizacionesPorIndices = await Promise.all(cotizacionesPorIndicesPromises);
   
-      return cotizacionesPorIndices; // Devolver todas las cotizaciones obtenidas
+      return cotizacionesPorIndices;
     } catch (error) {
       console.error('Error al obtener cotizaciones por índices:', error);
       throw new HttpException('Error al obtener cotizaciones por índices', HttpStatus.INTERNAL_SERVER_ERROR);
@@ -90,18 +89,18 @@ export class CotizacionIndiceService {
     await this.cotizacionIndiceRepository.save(cotizacionesParaGuardar);
   }
 
-//funcion que, obtiene los datos de obtenerCotizacionesPorIndices, y utiliza guardarCotizaciones para validar y guardar en la base de datos(DOCKER INDICE DEMAS)
+//funcion que, obtiene los datos de obtenerCotizacionesPorIndices, y utiliza guardarCotizaciones para validar y guardar en la base de datos(CRONNN)
   async obtenerYGuardarCotizacionesPorIndices(): Promise<void> {
     try {
-      // Obtener las cotizaciones por índices
+      
       const cotizacionesPorIndices = await this.obtenerCotizacionesPorIndices();
 
-      // Verificar si se obtuvieron cotizaciones
+      
       if (!cotizacionesPorIndices || cotizacionesPorIndices.length === 0) {
         throw new Error('No se encontraron cotizaciones para guardar');
       }
 
-      // Guardar las cotizaciones en la base de datos
+      
       await this.guardarCotizaciones(cotizacionesPorIndices);
     } catch (error) {
       throw new HttpException('Error al obtener y guardar cotizaciones: ' + error.message, HttpStatus.INTERNAL_SERVER_ERROR);
@@ -161,16 +160,16 @@ export class CotizacionIndiceService {
     try {
       const cotizacionesAgrupadas = await this.obtenerCotizacionesAgrupadas();
   
-      const promediosParaGuardar = []; // Array para almacenar los promedios a guardar
+      const promediosParaGuardar = []; 
   
-      // Iterar sobre cada fecha y hora en las cotizaciones agrupadas
+     
       for (const fecha in cotizacionesAgrupadas) {
         for (const hora in cotizacionesAgrupadas[fecha]) {
           const cotizaciones = cotizacionesAgrupadas[fecha][hora];
           const { suma, conteo } = this.calcularSumaYConteo(cotizaciones);
   
           if (conteo === 0) {
-            continue; // Si no hay cotizaciones, saltar a la siguiente iteración
+            continue; 
           }
   
           const promedio = suma / conteo;
@@ -178,10 +177,10 @@ export class CotizacionIndiceService {
           const indiceIBOV = await this.indiceRepository.findOne({ where: { codIndice: 'IBOV' } });
           if (!indiceIBOV) {
             console.warn(`El índice IBOV no se encontró en la base de datos.`);
-            continue; // Salta a la siguiente iteración
+            continue; 
           }
   
-          // Verificar si el promedio ya existe
+          
           const cotizacionExistente = await this.cotizacionIndiceRepository.findOne({
             where: {
               fecha: fecha,
@@ -207,7 +206,7 @@ export class CotizacionIndiceService {
       }
   
       // Guardar los promedios en lotes
-      const batchSize = 1000; // Tamaño del lote
+      const batchSize = 1000; 
       for (let i = 0; i < promediosParaGuardar.length; i += batchSize) {
         const batch = promediosParaGuardar.slice(i, i + batchSize);
         await this.cotizacionIndiceRepository.save(batch);
@@ -231,15 +230,15 @@ export class CotizacionIndiceService {
     const response = await axios.get(url);
     return response.data.length > 0;
   } catch (error) {
-    // No registrar nada en el log para errores
-    return false; // Devuelve false si hay un error
+    
+    return false; 
   }
 }
 
   //Publicar mi indiceCotizacionesen la base
   async publicarTodasLasCotizaciones(): Promise<any> {
   try {
-    // Obtener las cotizaciones agrupadas
+   
     const cotizacionesAgrupadas = await this.indiceCoti();
 
     if (Object.keys(cotizacionesAgrupadas).length === 0) {
@@ -253,14 +252,14 @@ export class CotizacionIndiceService {
         for (const cotizacion of cotizaciones) {
           if (!cotizacion.codIndice) {
             console.warn(`Cotización sin índice para la fecha ${fecha}. Se omitirá.`);
-            continue; // Salta a la siguiente cotización si no hay índice
+            continue; 
           }
 
           // Verificar si la cotización ya ha sido publicada en el servicio externo
           const yaPublicada = await this.verificarCotizacionEnGempresa(fecha, hora, cotizacion.codIndice);
           if (yaPublicada) {
             console.warn(`Cotización ya publicada para la fecha ${fecha} a las ${hora}. Se omitirá.`);
-            continue; // Salta a la siguiente cotización si ya fue publicada
+            continue; 
           }
 
           const data = {
@@ -271,12 +270,12 @@ export class CotizacionIndiceService {
           };
 
           try {
-            // Publicar la cotización en el servicio externo
+            
             const response = await axios.post(this.apiUrl, data);
             console.log(`Cotización publicada exitosamente: ${JSON.stringify(response.data)}`);
           } catch (error) {
             console.error(`Error al publicar la cotización para la fecha ${fecha} a las ${hora}:`, error.message);
-            continue; // Salta a la siguiente cotización si ocurre un error
+            continue; 
           }
         }
       }
@@ -289,7 +288,7 @@ export class CotizacionIndiceService {
   }
 }
 
-  //publicar mi indice en gempresa
+
 
   async obtenerCotizacionesIBOV(): Promise<any> {
     try {
@@ -342,37 +341,37 @@ export class CotizacionIndiceService {
         where: { codIndice: 'IBOV' }, // Asegúrate de que este campo se llama así
       });
   
-      // Obtener las cotizaciones de IBOV desde la API externa
-      const cotizacionesIBOV = await this.obtenerCotizacionesIBOV(); // Método que obtiene las cotizaciones desde la API
+      
+      const cotizacionesIBOV = await this.obtenerCotizacionesIBOV(); 
   
-      // Crear un conjunto para facilitar la verificación de cotizaciones existentes
+      
       const cotizacionesExistentesSet = new Set(
         cotizacionesExistentes.map(cotizacion => `${cotizacion.fecha}-${cotizacion.hora}`)
       );
   
-      // Crear un array para almacenar las cotizaciones a publicar
+      
       const cotizacionesParaPublicar = [];
   
-      // Publicar las cotizaciones que faltan
+     
       for (const cotizacion of cotizacionesIBOV) {
-        const fecha = cotizacion.fecha; // Fecha de la cotización
-        const hora = cotizacion.hora; // Hora de la cotización
-        const key = `${fecha}-${hora}`; // Crear una clave única para la verificación
+        const fecha = cotizacion.fecha; 
+        const hora = cotizacion.hora; 
+        const key = `${fecha}-${hora}`; 
   
-        // Verificar si la cotización ya existe en la base de datos
+       
         if (!cotizacionesExistentesSet.has(key)) {
-          // Si no existe, crear el objeto con el formato esperado
+          
           const data = {
-            _id: cotizacion.id, // Asegúrate de que este campo esté disponible
+            _id: cotizacion.id, 
             code: 'IBOV',
             fecha: cotizacion.fecha,
             hora: cotizacion.hora,
-            fechaDate: moment(`${cotizacion.fecha}T00:00:00.000Z`).toISOString(), // Formatear la fecha
-            valor: cotizacion.valorCotizacionIndice, // Asegúrate de que este campo esté disponible
+            fechaDate: moment(`${cotizacion.fecha}T00:00:00.000Z`).toISOString(), 
+            valor: cotizacion.valorCotizacionIndice,
             __v: 0,
           };
   
-          // Agregar a la lista de cotizaciones a publicar
+          
           cotizacionesParaPublicar.push(data);
           console.log(`Cotización a publicar: ${JSON.stringify(data)}`);
         } else {
@@ -380,8 +379,8 @@ export class CotizacionIndiceService {
         }
       }
   
-      // Publicar las cotizaciones en la API externa en lotes
-      const batchSize = 1000; // Tamaño del lote
+      
+      const batchSize = 1000; 
       for (let i = 0; i < cotizacionesParaPublicar.length; i += batchSize) {
         const batch = cotizacionesParaPublicar.slice(i, i + batchSize);
         await Promise.all(batch.map(data => axios.post(this.apiUrl, data)));
@@ -450,19 +449,19 @@ ACA ABAJO TODO LO DE FRONT    -----      ACA ABAJO TODO LO DE FRONT    -------  
 
 async obtenerPromedioCotizacionesPorDiaDeTodosLosIndices(): Promise<{ codigoIndice: string; fecha: string; promedio: number }[]> {
   try {
-    // Obtener todas las cotizaciones por índices
+   
     const cotizacionesPorIndices = await this.obtenerCotizacionesPorIndices();
 
-    // Crear un objeto para almacenar los promedios agrupados por índice y fecha
+   
     const promediosPorDia: { [codigoIndice: string]: { [fecha: string]: number[] } } = {};
 
-    // Iterar sobre cada índice y sus cotizaciones
+   
     cotizacionesPorIndices.forEach(indice => {
       const codigoIndice = indice.codigoIndice;
       indice.cotizaciones.forEach(cotizacion => {
         const fechaCotizacion = moment(cotizacion.fecha).format('YYYY-MM-DD'); // Formato año-mes-día
 
-        // Inicializar la estructura si no existe
+       
         if (!promediosPorDia[codigoIndice]) {
           promediosPorDia[codigoIndice] = {};
         }
@@ -470,22 +469,22 @@ async obtenerPromedioCotizacionesPorDiaDeTodosLosIndices(): Promise<{ codigoIndi
           promediosPorDia[codigoIndice][fechaCotizacion] = [];
         }
 
-        // Agregar el valor de la cotización al array correspondiente
-        promediosPorDia[codigoIndice][fechaCotizacion].push(cotizacion.valor); // Asumiendo que cotizacion.valor es el valor de la cotización
+        
+        promediosPorDia[codigoIndice][fechaCotizacion].push(cotizacion.valor); 
       });
     });
 
-    // Calcular el promedio por día para cada índice
+ 
     const resultados = Object.keys(promediosPorDia).flatMap(codigoIndice => {
       return Object.keys(promediosPorDia[codigoIndice]).map(fecha => {
         const valores = promediosPorDia[codigoIndice][fecha];
         const suma = valores.reduce((acc, valor) => acc + valor, 0);
-        const promedio = valores.length > 0 ? parseFloat((suma / valores.length).toFixed(2)) : 0; // Evitar división por cero
+        const promedio = valores.length > 0 ? parseFloat((suma / valores.length).toFixed(2)) : 0; // Evita división por cero
         return { codigoIndice, fecha, promedio };
       });
     });
 
-    return resultados; // Devolver los promedios por día y por índice
+    return resultados;
   } catch (error) {
     console.error('Error al obtener el promedio de cotizaciones por día de todos los índices:', error);
     throw new HttpException('Error al obtener el promedio de cotizaciones por día de todos los índices', HttpStatus.INTERNAL_SERVER_ERROR);
@@ -495,47 +494,47 @@ async obtenerPromedioCotizacionesPorDiaDeTodosLosIndices(): Promise<{ codigoIndi
 
 
 
-
+//las cotizacioens de este indices on muyg randes y rompe el graficoooooo
 async calcularPromedioTotalPorIndiceSinTSE(): Promise<any[]> {
   try {
-    // Obtener todas las cotizaciones por índices
+   
     const cotizacionesPorIndices = await this.obtenerCotizacionesPorIndices();
 
-    // Crear un objeto para almacenar los totales y conteos por índice
+    
     const promediosTotales: { [codigoIndice: string]: { suma: number; conteo: number; nombre: string } } = {};
 
-    // Iterar sobre cada índice y sus cotizaciones
+
     cotizacionesPorIndices.forEach(indice => {
-      const codigoIndice = indice.codigoIndice; // Obtener el código del índice
-      const nombreIndice = indice.nombre; // Suponiendo que tienes el nombre del índice en el objeto indice
+      const codigoIndice = indice.codigoIndice; 
+      const nombreIndice = indice.nombre; 
 
       // Ignorar el índice TSE
       if (codigoIndice === 'TSE') {
-        return; // Salir de la iteración si es TSE
+        return; 
       }
 
       indice.cotizaciones.forEach(cotizacion => {
-        const valorCotizacion = cotizacion.valor; // Asumiendo que cotizacion.valor es el valor de la cotización
+        const valorCotizacion = cotizacion.valor; 
 
-        // Inicializar la estructura si no existe
+       
         if (!promediosTotales[codigoIndice]) {
-          promediosTotales[codigoIndice] = { suma: 0, conteo: 0, nombre: nombreIndice }; // Guardar el nombre del índice
+          promediosTotales[codigoIndice] = { suma: 0, conteo: 0, nombre: nombreIndice }; 
         }
 
-        // Sumar el valor de la cotización y aumentar el conteo
+     
         promediosTotales[codigoIndice].suma += valorCotizacion;
         promediosTotales[codigoIndice].conteo += 1;
       });
     });
 
-    // Calcular el promedio total por índice
+
     const resultados = Object.keys(promediosTotales).map(codigoIndice => {
       const { suma, conteo, nombre } = promediosTotales[codigoIndice];
-      const promedioTotal = conteo > 0 ? parseFloat((suma / conteo).toFixed(2)) : 0; // Evitar división por cero
-      return { codigoIndice, nombre, promedioTotal }; // Incluir el nombre en el resultado
+      const promedioTotal = conteo > 0 ? parseFloat((suma / conteo).toFixed(2)) : 0; 
+      return { codigoIndice, nombre, promedioTotal }; 
     });
 
-    return resultados; // Devolver los promedios totales
+    return resultados; 
   } catch (error) {
     console.error('Error al calcular el promedio total por índice sin TSE:', error);
     throw new HttpException('Error al calcular el promedio total por índice sin TSE', HttpStatus.INTERNAL_SERVER_ERROR);
@@ -544,38 +543,36 @@ async calcularPromedioTotalPorIndiceSinTSE(): Promise<any[]> {
 
 async calcularPromedioTotalPorIndice(): Promise<any[]> {
   try {
-    // Obtener todas las cotizaciones por índices
+  
     const cotizacionesPorIndices = await this.obtenerCotizacionesPorIndices();
 
-    // Crear un objeto para almacenar los totales y conteos por índice
+   
     const promediosTotales: { [codigoIndice: string]: { suma: number; conteo: number; nombre: string } } = {};
 
-    // Iterar sobre cada índice y sus cotizaciones
+   
     cotizacionesPorIndices.forEach(indice => {
-      const codigoIndice = indice.codigoIndice; // Obtener el código del índice
-      const nombreIndice = indice.nombre; // Suponiendo que tienes el nombre del índice en el objeto indice
+      const codigoIndice = indice.codigoIndice; 
+      const nombreIndice = indice.nombre; 
       indice.cotizaciones.forEach(cotizacion => {
-        const valorCotizacion = cotizacion.valor; // Asumiendo que cotizacion.valor es el valor de la cotización
+        const valorCotizacion = cotizacion.valor; 
 
-        // Inicializar la estructura si no existe
+     
         if (!promediosTotales[codigoIndice]) {
-          promediosTotales[codigoIndice] = { suma: 0, conteo: 0, nombre: nombreIndice }; // Guardar el nombre del índice
+          promediosTotales[codigoIndice] = { suma: 0, conteo: 0, nombre: nombreIndice }; 
         }
-
-        // Sumar el valor de la cotización y aumentar el conteo
         promediosTotales[codigoIndice].suma += valorCotizacion;
         promediosTotales[codigoIndice].conteo += 1;
       });
     });
 
-    // Calcular el promedio total por índice
+    
     const resultados = Object.keys(promediosTotales).map(codigoIndice => {
       const { suma, conteo, nombre } = promediosTotales[codigoIndice];
-      const promedioTotal = conteo > 0 ? parseFloat((suma / conteo).toFixed(2)) : 0; // Evitar división por cero
-      return { codigoIndice, nombre, promedioTotal }; // Incluir el nombre en el resultado
+      const promedioTotal = conteo > 0 ? parseFloat((suma / conteo).toFixed(2)) : 0; 
+      return { codigoIndice, nombre, promedioTotal }; 
     });
 
-    return resultados; // Devolver los promedios totales
+    return resultados; 
   } catch (error) {
     console.error('Error al calcular el promedio total por índice:', error);
     throw new HttpException('Error al calcular el promedio total por índice', HttpStatus.INTERNAL_SERVER_ERROR);
@@ -584,24 +581,24 @@ async calcularPromedioTotalPorIndice(): Promise<any[]> {
 
 async obtenerCotizacionesUltimoMesPorIndices(): Promise<any[]> {
   try {
-    // Obtener la fecha actual y la fecha de hace un mes
+    
     const fechaActual = moment();
     const fechaHaceUnMes = moment().subtract(1, 'months');
 
-    // Obtener todos los índices
+    
     const indices = await this.indiceService.findAll();
     const cotizacionesPorIndices = [];
 
-    // Iterar sobre cada índice
+ 
     for (const indice of indices) {
-      const codigoIndice = indice.codIndice; // Obtener el código del índice
+      const codigoIndice = indice.codIndice;
       const cotizacionesPorDia = [];
 
-      // Iterar sobre cada día del último mes
+     
       for (let fecha = fechaHaceUnMes.clone(); fecha.isBefore(fechaActual); fecha.add(1, 'days')) {
         const fechaStr = fecha.format('YYYY-MM-DD');
 
-        // Obtener las cotizaciones del índice para la fecha actual
+        
         const cotizaciones = await this.cotizacionIndiceRepository.find({
           where: {
             codigoIndice: { codIndice: codigoIndice },
@@ -611,17 +608,17 @@ async obtenerCotizacionesUltimoMesPorIndices(): Promise<any[]> {
 
         cotizacionesPorDia.push({
           fecha: fechaStr,
-          cotizaciones, // Almacenar las cotizaciones para ese día
+          cotizaciones, 
         });
       }
 
       cotizacionesPorIndices.push({
         codigoIndice,
-        cotizacionesPorDia, // Almacenar las cotizaciones por día para el índice
+        cotizacionesPorDia, 
       });
     }
 
-    return cotizacionesPorIndices; // Devolver todas las cotizaciones obtenidas
+    return cotizacionesPorIndices; 
   } catch (error) {
     console.error('Error al obtener cotizaciones del último mes por índices:', error);
     throw new HttpException('Error al obtener cotizaciones del último mes por índices', HttpStatus.INTERNAL_SERVER_ERROR);
@@ -630,23 +627,22 @@ async obtenerCotizacionesUltimoMesPorIndices(): Promise<any[]> {
 
 async obtenerPromedioMensualCotizacionesIndices(): Promise<any[]> {
   try {
-    const fechaDesde = moment().startOf('year').format('YYYY-MM-DD') + 'T00:00'; // Fecha de inicio del año a las 00:00
-    const fechaHasta = moment().endOf('day').format('YYYY-MM-DD') + 'T23:59'; // Fecha actual a las 23:59
+    const fechaDesde = moment().startOf('year').format('YYYY-MM-DD') + 'T00:00'; 
+    const fechaHasta = moment().endOf('day').format('YYYY-MM-DD') + 'T23:59'; 
 
-    // Obtener todas las cotizaciones por índices
-    const cotizacionesPorIndices = await this.obtenerCotizacionesPorIndices(); // Asegúrate de que este método devuelve todas las cotizaciones del año
+    const cotizacionesPorIndices = await this.obtenerCotizacionesPorIndices(); 
 
-    // Crear un objeto para almacenar los totales y conteos por mes y por índice
+  
     const promediosMensuales: { [codigoIndice: string]: { [mes: string]: { suma: number; conteo: number } } } = {};
 
-    // Iterar sobre cada índice y sus cotizaciones
+    
     cotizacionesPorIndices.forEach(indice => {
       indice.cotizaciones.forEach(cotizacion => {
         const fechaCotizacion = moment(cotizacion.fecha);
-        const mesKey = fechaCotizacion.format('YYYY-MM'); // Formato año-mes
-        const codigoIndice = indice.codigoIndice; // Obtener el código del índice
+        const mesKey = fechaCotizacion.format('YYYY-MM'); 
+        const codigoIndice = indice.codigoIndice; 
 
-        // Inicializar la estructura si no existe
+      
         if (!promediosMensuales[codigoIndice]) {
           promediosMensuales[codigoIndice] = {};
         }
@@ -654,23 +650,22 @@ async obtenerPromedioMensualCotizacionesIndices(): Promise<any[]> {
           promediosMensuales[codigoIndice][mesKey] = { suma: 0, conteo: 0 };
         }
 
-        // Sumar el valor de la cotización y aumentar el conteo
-        promediosMensuales[codigoIndice][mesKey].suma += cotizacion.valor; // Asumiendo que cotizacion.valor es el valor de la cotización
+     
+        promediosMensuales[codigoIndice][mesKey].suma += cotizacion.valor;
         promediosMensuales[codigoIndice][mesKey].conteo += 1;
       });
     });
 
-    // Calcular el promedio mensual para cada índice
     const resultados = Object.keys(promediosMensuales).map(codigoIndice => {
       const promediosPorIndice = Object.keys(promediosMensuales[codigoIndice]).map(mes => {
         const { suma, conteo } = promediosMensuales[codigoIndice][mes];
-        const promedioMensual = conteo > 0 ? parseFloat((suma / conteo).toFixed(2)) : 0; // Evitar división por cero
-        return { mes, promedioMensual }; // Incluir el mes y el promedio en el resultado
+        const promedioMensual = conteo > 0 ? parseFloat((suma / conteo).toFixed(2)) : 0; 
+        return { mes, promedioMensual }; 
       });
-      return { codigoIndice, promedios: promediosPorIndice }; // Agrupar por código de índice
+      return { codigoIndice, promedios: promediosPorIndice }; 
     });
 
-    return resultados; // Devolver los promedios mensuales por índice
+    return resultados; 
   } catch (error) {
     console.error('Error al obtener el promedio mensual de cotizaciones de índices:', error);
     throw new HttpException('Error al obtener el promedio mensual de cotizaciones de índices', HttpStatus.INTERNAL_SERVER_ERROR);
@@ -679,25 +674,22 @@ async obtenerPromedioMensualCotizacionesIndices(): Promise<any[]> {
 
 async obtenerCotizacionesUltimoMes(): Promise<any[]> {
   try {
-    // Obtener todas las cotizaciones por índices
+ 
     const cotizacionesPorIndices = await this.obtenerCotizacionesPorIndices();
-    
-    // Obtener la fecha actual y la fecha de hace un mes
+
     const fechaActual = moment();
     const fechaHaceUnMes = moment().subtract(1, 'months');
 
-    // Crear un objeto para almacenar los promedios diarios agrupados por codIndice
     const promediosDiarios: { [key: string]: { [fecha: string]: { suma: number; conteo: number } } } = {};
 
-    // Iterar sobre cada índice y sus cotizaciones
     cotizacionesPorIndices.forEach(indice => {
-      const codigoIndice = indice.codigoIndice; // Obtener el código del índice
+      const codigoIndice = indice.codigoIndice; 
       indice.cotizaciones.forEach(cotizacion => {
         const fechaCotizacion = moment(cotizacion.fecha);
         if (fechaCotizacion.isBetween(fechaHaceUnMes, fechaActual, null, '[]')) {
           const fechaKey = fechaCotizacion.format('YYYY-MM-DD');
 
-          // Inicializar la estructura si no existe
+      
           if (!promediosDiarios[codigoIndice]) {
             promediosDiarios[codigoIndice] = {};
           }
@@ -705,20 +697,19 @@ async obtenerCotizacionesUltimoMes(): Promise<any[]> {
             promediosDiarios[codigoIndice][fechaKey] = { suma: 0, conteo: 0 };
           }
 
-          promediosDiarios[codigoIndice][fechaKey].suma += cotizacion.valor; // Asumiendo que cotizacion.valor es el valor de la cotización
+          promediosDiarios[codigoIndice][fechaKey].suma += cotizacion.valor; 
           promediosDiarios[codigoIndice][fechaKey].conteo += 1;
         }
       });
     });
 
-    // Calcular el promedio por día para cada índice
     const promediosPorIndice = Object.keys(promediosDiarios).map(codigoIndice => {
       const promediosPorDia = Object.keys(promediosDiarios[codigoIndice]).map(fecha => {
         const { suma, conteo } = promediosDiarios[codigoIndice][fecha];
-        const promedio = conteo > 0 ? parseFloat((suma / conteo).toFixed(2)) : 0; // Evitar división por cero
+        const promedio = conteo > 0 ? parseFloat((suma / conteo).toFixed(2)) : 0; 
         return { fecha, promedio };
       });
-      return { codigoIndice, promedios: promediosPorDia }; // Agrupar por código de índice
+      return { codigoIndice, promedios: promediosPorDia }; 
     });
 
     return promediosPorIndice;

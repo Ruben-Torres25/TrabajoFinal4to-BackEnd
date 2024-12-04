@@ -26,27 +26,25 @@ export class CotizacionService {
     try {
       const promediosPorDia = await this.obtenerPromedioCotizacionesPorDiaDeTodasLasEmpresas();
       
-      // Crear un objeto para almacenar la suma de promedios y conteo de días por empresa
+    
       const promediosTotales: { [codempresa: string]: { suma: number; conteo: number; empresaNombre: string } } = {};
   
       for (const promedio of promediosPorDia) {
         const { codempresa, empresaNombre, promedio: valorPromedio } = promedio;
   
-        // Si la empresa no está en el objeto, inicialízala
         if (!promediosTotales[codempresa]) {
           promediosTotales[codempresa] = { suma: 0, conteo: 0, empresaNombre };
         }
-  
-        // Sumar el promedio y aumentar el conteo
+
         promediosTotales[codempresa].suma += valorPromedio;
         promediosTotales[codempresa].conteo += 1;
       }
   
-      // Calcular el promedio total por empresa
+    
       const resultados = Object.keys(promediosTotales).map(codempresa => {
         const { suma, conteo, empresaNombre } = promediosTotales[codempresa];
-        const promedioTotal = suma / conteo; // Calcular el promedio total
-        return { codempresa, empresaNombre, promedioTotal: parseFloat(promedioTotal.toFixed(2)) }; // Redondear a 2 decimales
+        const promedioTotal = suma / conteo; 
+        return { codempresa, empresaNombre, promedioTotal: parseFloat(promedioTotal.toFixed(2)) }; 
       });
   
       return resultados;
@@ -58,29 +56,26 @@ export class CotizacionService {
   
   async obtenerPromedioCotizacionesUltimoMesAgrupadosPorEmpresa(): Promise<{ codempresa: string; empresaNombre: string; promedios: { fecha: string; promedio: number }[] }[]> {
     try {
-      // Obtener todos los promedios de cotizaciones por día de todas las empresas
+
       const promediosPorDia = await this.obtenerPromedioCotizacionesPorDiaDeTodasLasEmpresas();
   
-      // Obtener la fecha actual y la fecha de hace un mes
       const fechaActual = moment();
       const fechaHaceUnMes = moment().subtract(1, 'months');
   
-      // Crear un objeto para almacenar los promedios agrupados por empresa
       const promediosAgrupados: { [codempresa: string]: { empresaNombre: string; promedios: { fecha: string; promedio: number }[] } } = {};
-  
-      // Filtrar y agrupar los resultados
+
       promediosPorDia.forEach(promedio => {
         const fechaCotizacion = moment(promedio.fecha);
-        // Filtrar solo los del último mes
+
         if (fechaCotizacion.isBetween(fechaHaceUnMes, fechaActual, null, '[]')) {
           const { codempresa, empresaNombre } = promedio;
   
-          // Si la empresa no está en el objeto, inicializarla
+    
           if (!promediosAgrupados[codempresa]) {
             promediosAgrupados[codempresa] = { empresaNombre, promedios: [] };
           }
   
-          // Agregar el promedio a la lista de promedios de la empresa
+  
           promediosAgrupados[codempresa].promedios.push({
             fecha: promedio.fecha,
             promedio: promedio.promedio,
@@ -88,7 +83,7 @@ export class CotizacionService {
         }
       });
   
-      // Convertir el objeto en un array
+ 
       return Object.keys(promediosAgrupados).map(codempresa => ({
         codempresa,
         empresaNombre: promediosAgrupados[codempresa].empresaNombre,
@@ -102,14 +97,14 @@ export class CotizacionService {
 
   async obtenerPromedioCotizacionesPorDiaDeTodasLasEmpresas(): Promise<{ codempresa: string; empresaNombre: string; fecha: string; promedio: number }[]> {
     try {
-      const empresas = await this.empresaRepository.find(); // Obtener todas las empresas
+      const empresas = await this.empresaRepository.find(); 
       const resultados = [];
   
       for (const empresa of empresas) {
-        const promedios = await this.obtenerPromedioCotizacionesPorDia(empresa.codempresa); // Llamar al método existente para cada empresa
+        const promedios = await this.obtenerPromedioCotizacionesPorDia(empresa.codempresa);
         resultados.push(...promedios.map(promedio => ({
           codempresa: empresa.codempresa,
-          nombre: empresa.empresaNombre, // Asegúrate de que 'nombre' es la propiedad correcta
+          nombre: empresa.empresaNombre, 
           ...promedio
         })));
       }
@@ -125,13 +120,13 @@ export class CotizacionService {
     try {
       // Calcular la fecha de hace 3 días
       const fechaDesde = moment().subtract(3, 'days').startOf('day').toDate();
-      const fechaHasta = new Date(); // Fecha actual
+      const fechaHasta = new Date(); 
 
-      // Realizar la consulta para obtener las cotizaciones en el rango de fechas para la empresa específica
+     
       const cotizaciones = await this.cotizacionRepository.find({
         where: {
-          fecha: Between(fechaDesde, fechaHasta), // Usar Between para el rango
-          empresa: { codempresa: codempresa }, // Filtrar por el código de la empresa
+          fecha: Between(fechaDesde, fechaHasta), 
+          empresa: { codempresa: codempresa }, 
         },
         order: {
           fecha: 'ASC',
@@ -147,39 +142,39 @@ export class CotizacionService {
 
   async obtenerPromedioCotizacionesPorDia(codigoEmpresa: string): Promise<{ fecha: string; promedio: number }[]> {
     try {
-      // Obtener todas las cotizaciones de la empresa
+    
       const cotizaciones = await this.cotizacionRepository.find({
         where: {
           empresa: { codempresa: codigoEmpresa },
         },
       });
 
-      // Verificar si hay cotizaciones
+   
       if (cotizaciones.length === 0) {
         throw new HttpException('No se encontraron cotizaciones para la empresa especificada', HttpStatus.NOT_FOUND);
       }
 
-      // Agrupar cotizaciones por fecha
+    
       const cotizacionesPorFecha = cotizaciones.reduce((acc, cotizacion) => {
-        const fecha = new Date(cotizacion.fecha).toISOString().substring(0, 10); // Formato yyyy-mm-dd
+        const fecha = new Date(cotizacion.fecha).toISOString().substring(0, 10);
         if (!acc[fecha]) {
           acc[fecha] = [];
         }
-        acc[fecha].push(cotizacion.cotization); // Asegúrate de que cotization sea un número
+        acc[fecha].push(cotizacion.cotization); 
         return acc;
       }, {});
 
-      // Calcular el promedio por día
+     
       const promediosPorDia = Object.keys(cotizacionesPorFecha).map(fecha => {
         const cotizacionesDelDia = cotizacionesPorFecha[fecha];
         
         if (cotizacionesDelDia.length === 0) {
-          return { fecha, promedio: 0 }; // O manejarlo de otra manera
+          return { fecha, promedio: 0 }; 
         }
 
         const suma = cotizacionesDelDia.reduce((total, valor) => total + (parseFloat(valor) || 0), 0);
         const promedio = suma / cotizacionesDelDia.length;
-        return { fecha, promedio: parseFloat(promedio.toFixed(2)) }; // Redondear a dos decimales
+        return { fecha, promedio: parseFloat(promedio.toFixed(2)) }; 
       });
 
       return promediosPorDia;
@@ -303,9 +298,8 @@ export class CotizacionService {
       const fechaActual = moment().endOf('day').format('YYYY-MM-DD') + 'T23:59';
   
       const empresas = await this.empresaRepository.find();
-      const cotizacionesParaGuardar = []; // Array para almacenar las cotizaciones a guardar
-  
-      // Crear un array de promesas para obtener cotizaciones de todas las empresas
+      const cotizacionesParaGuardar = []; 
+
       const promises = empresas.map(async (empresa) => {
         const ultimaCotizacion = await this.cotizacionRepository.findOne({
           where: { empresa: { id: empresa.id } },
@@ -317,12 +311,11 @@ export class CotizacionService {
         for (let fecha = moment(fechaUltimaGuardada).add(1, 'days'); fecha.isBefore(fechaActual); fecha.add(1, 'days')) {
           const fechaStr = fecha.format('YYYY-MM-DD');
   
-          // Iterar solo desde las 9:00 hasta las 15:00 (inclusive)
           for (let hora = 9; hora <= 15; hora++) {
             const horaStr = hora.toString().padStart(2, '0') + ':00';
   
             try {
-              // Verificar si ya existe la cotización
+  
               const cotizacionExistente = await this.cotizacionRepository.findOne({
                 where: {
                   empresa: { id: empresa.id },
@@ -333,18 +326,18 @@ export class CotizacionService {
   
               if (cotizacionExistente) {
                 console.log(`Cotización ya existe para la empresa ${empresa.codempresa} en la fecha ${fechaStr} a las ${horaStr}`);
-                continue; // Salta a la siguiente iteración si ya existe
+                continue; 
               }
   
               const cotizacion = await clienteAxios.get(`${this.apiUrl}empresas/${empresa.codempresa}/cotizaciones`, {
                 params: { fechaDesde: `${fechaStr}T${horaStr}`, fechaHasta: `${fechaStr}T${horaStr}` },
               });
   
-              // Acceder al primer elemento del array
-              const cotizacionData = cotizacion.data[0]; // Asegúrate de que hay al menos un elemento
+              
+              const cotizacionData = cotizacion.data[0]; 
               if (!cotizacionData) {
                 console.error(`No se encontraron datos de cotización para la empresa ${empresa.codempresa} en la fecha ${fechaStr} a las ${horaStr}`);
-                continue; // Salta a la siguiente iteración si no hay datos
+                continue; 
               }
   
               cotizacionesParaGuardar.push(this.cotizacionRepository.create({
@@ -361,11 +354,11 @@ export class CotizacionService {
         }
       });
   
-      // Esperar a que todas las promesas se resuelvan
+    
       await Promise.all(promises);
   
-      // Guardar las cotizaciones en lotes
-      const batchSize = 1000; // Tamaño del lote
+     
+      const batchSize = 1000; 
       for (let i = 0; i < cotizacionesParaGuardar.length; i += batchSize) {
         const batch = cotizacionesParaGuardar.slice(i, i + batchSize);
         await this.cotizacionRepository.save(batch);

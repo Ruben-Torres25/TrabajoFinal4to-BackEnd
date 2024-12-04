@@ -55,7 +55,7 @@ export class CotizacionIndiceController {
   @Post('guardar-manualmente')
   async guardarCotizacionesManualmente(): Promise<{ message: string }> {
     try {
-      // Llamar a la función que obtiene y guarda las cotizaciones por índices
+
       await this.cotizacionIndiceService.obtenerYGuardarCotizacionesPorIndices();
 
       return { message: 'Cotizaciones obtenidas y guardadas exitosamente.' };
