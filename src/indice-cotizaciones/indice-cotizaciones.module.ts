@@ -6,7 +6,7 @@ import { CotizacionIndice } from './entities/indice-cotizacione.entity';
 import { Indice } from 'src/indice/entities/indice.entity';
 import { Cotizacion } from 'src/cotizaciones/entitis/cotizacion.entity';
 import { IndiceService } from 'src/indice/indice.service';
-
+ 
 @Module({
   imports: [
     TypeOrmModule.forFeature([CotizacionIndice, Indice, Cotizacion]),

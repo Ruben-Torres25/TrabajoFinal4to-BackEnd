@@ -50,25 +50,25 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], CotizacionCronService.prototype, "handleCronObtenerCotizacionesEmpresas", null);
 __decorate([
-    (0, schedule_1.Cron)('59 * * * *'),
+    (0, schedule_1.Cron)('5 * * * *'),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
 ], CotizacionCronService.prototype, "handleCronObtenerIndices", null);
 __decorate([
-    (0, schedule_1.Cron)('52 * * * *'),
+    (0, schedule_1.Cron)('10 * * * *'),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
 ], CotizacionCronService.prototype, "handleCronCalcularMiIndiceYGuardarloEnDB", null);
 __decorate([
-    (0, schedule_1.Cron)('53 * * * *'),
+    (0, schedule_1.Cron)('15 * * * *'),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
 ], CotizacionCronService.prototype, "handleCronPublicarIndice", null);
 __decorate([
-    (0, schedule_1.Cron)('54 * * * *'),
+    (0, schedule_1.Cron)('20 * * * *'),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
